@@ -3,11 +3,16 @@ package com.naohman.language.transsiberian;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
+
+import org.apache.lucene.morphology.russian.RussianAnalyzer;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
+import org.apache.lucene.morphology.russian.RussianMorphology;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +29,10 @@ public class TranslationService {
     private EnglishLuceneMorphology engMorph;
     private RussianLuceneMorphology rusMorph;
     private static final String[] TRANSLATION_COLS = {"keyword", "definition"};
+    private Context ctx;
 
     public TranslationService(Context context){
+        this.ctx = context;
         try {
             this.engMorph = new EnglishLuceneMorphology();
             this.rusMorph = new RussianLuceneMorphology();
@@ -46,15 +53,9 @@ public class TranslationService {
 
     //Take DB entries and format them in android HTML
     private Spannable formatResponse(String response){
-        response = response.replaceAll("<ex>", "<small><font color='#999999'>"); //example usages
-        response = response.replaceAll("</ex>", "</font></small>"); //example usages
-        response = response.replaceAll("<kref>", "<a href='#somewhere'>"); //references to other keywords
-        response = response.replaceAll("</kref>", "</a>"); //references to other keywords
         response = response.replaceAll("<rref>.+</rref>", ""); //remove reference to external resources
-        response = response.replaceAll("<k>", "<h1>"); //keyword, make heading
-        response = response.replaceAll("</k>\\s*\\\\n", "</h1>"); // remove newline after heading
         response = response.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-        DictHeading h = new DictHeading(response, 0); //parse structure
+        DictHeading h = new DictHeading(response, 0, (Translate) ctx); //parse structure
         return h.toSpan();
     }
 
@@ -107,7 +108,7 @@ public class TranslationService {
     private Cursor queryKeyword(String keyword){
         String [] whereArgs = {keyword};
         Cursor cursor = database.query(DBHelper.TABLE_DICT,
-                TRANSLATION_COLS, "keyword=? COLLATE NOCASE", whereArgs,
+                TRANSLATION_COLS, "keyword=?", whereArgs,
                 null, null, null);
         return cursor;
     }
@@ -129,7 +130,7 @@ public class TranslationService {
     private Spannable concatSpans(List<Spannable> spans){
         SpannableStringBuilder s = new SpannableStringBuilder();
         for (Spannable span : spans){
-            s.append(span);
+            s.append(span).append(Html.fromHtml("<br>"));
         }
         return s;
     }

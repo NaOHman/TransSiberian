@@ -20,17 +20,17 @@ import java.util.List;
  */
 public class DictHeading {
     private static final int MAX_PREFIX = 4;
-    private static final String[] FIRST_PREFIX = {"<b>I</b>", "1\\.","1\\)","а\\)","a\\)"};
+    private static final String[] FIRST_PREFIX = {"<b>I</b>", "<b>1\\.</b>","1\\)","а\\)","a\\)"};
     private List<DictHeading> subHeadings;
     private String contents;
-    private int prefix;
+    private Html.TagHandler handler;
 
-    public DictHeading(String text, int  prefixLevel){
+    public DictHeading(String text, int  prefixLevel, Html.TagHandler h){
+        this.handler = h;
         //no possible subheadings
         if (prefixLevel == MAX_PREFIX){
             this.contents = text;
             this.subHeadings = null;
-            this.prefix = prefixLevel;
             return;
         }
         this.subHeadings = new ArrayList<>();
@@ -39,7 +39,6 @@ public class DictHeading {
         //Not every level of prefix gets used
         while (rawHeadings.size() < 2 && prefixLevel < MAX_PREFIX) {
             rawHeadings = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
-            this.prefix = prefixLevel;
             prefixLevel++;
         }
         if (rawHeadings.size() > 0)
@@ -48,7 +47,7 @@ public class DictHeading {
             this.contents = text;
         if (rawHeadings.size() > 1){
             for (int i=1; i<rawHeadings.size(); i++){
-                subHeadings.add(new DictHeading(rawHeadings.get(i), prefixLevel));
+                subHeadings.add(new DictHeading(rawHeadings.get(i), prefixLevel, h));
             }
         }
     }
@@ -57,7 +56,7 @@ public class DictHeading {
      * break the text into a list of sections where the first section contains
      * the contents of a the text and the others, the text that forms the subHeadings
      */
-    private List<String> breakHeadings(String text, String prefix, int prefixLevel){
+    private static List<String> breakHeadings(String text, String prefix, int prefixLevel){
         List<String> headings = new ArrayList<>();
         //prefixes must be searched for in order because sometimes they appear in
         //a non-prefix role
@@ -78,7 +77,7 @@ public class DictHeading {
     }
 
     private SpannableStringBuilder toSpan(int indent){
-        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml(contents);
+        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("\u200B"+contents,null, handler);
         s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
         if (subHeadings != null) {
             for (DictHeading heading : subHeadings) {
@@ -92,7 +91,7 @@ public class DictHeading {
      * generates the next prefix given the prefix level and the
      * current prefix. ex. <b>II</b> => <b>III</b>
      */
-    private String nextPrefix(int level, String current){
+    private static String nextPrefix(int level, String current){
         String next = "";
         switch (level) {
             case 0:
@@ -100,8 +99,8 @@ public class DictHeading {
                 next = "<b>" + nextRomanNumeral(next) + "</b>";
                 break;
             case 1:
-                next = current.substring(0, current.length() -2);
-                next = "" + (Integer.parseInt(next) + 1) + "\\.";
+                next = current.replaceAll("\\\\?\\.?</?b>", "");
+                next = "<b>" + (Integer.parseInt(next) + 1) + "\\.</b>";
                 break;
             case 2:
                 next = current.substring(0, current.length() -2);
@@ -118,7 +117,7 @@ public class DictHeading {
     /*
      * ONLY WORKS FOR VALUES < 40!!!
      */
-    private String nextRomanNumeral(String current){
+    private static String nextRomanNumeral(String current){
         current += 'I';
         current = current.replaceAll("IIII","IV");
         current = current.replaceAll("IVI","V");
