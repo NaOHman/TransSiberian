@@ -1,8 +1,11 @@
 package com.naohman.language.transsiberian;
 
-import android.content.Intent;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -30,8 +33,7 @@ import java.util.Locale;
 import java.util.Stack;
 
 public class Translate extends ActionBarActivity implements
-        TextToSpeech.OnInitListener, Html.TagHandler {
-    public static final String CYRILLIC = "аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ";
+        TextToSpeech.OnInitListener, Html.TagHandler, View.OnClickListener{
     private EditText et_keyword;
     private Button btn_translate;
     private TextView tv_translation;
@@ -45,22 +47,52 @@ public class Translate extends ActionBarActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new SetUpTask().execute();
         setContentView(R.layout.activity_translate);
         et_keyword = (EditText) findViewById(R.id.et_keyword);
         btn_translate = (Button) findViewById(R.id.btn_translate);
         sv_translation = (ScrollView) findViewById(R.id.sv_translation);
         tv_translation = (TextView) findViewById(R.id.tv_translation);
         tv_translation.setMovementMethod(LinkMovementMethod.getInstance());
-        ts = new TranslationService(this);
-        ts.open();
-        tts = new TextToSpeech(this, this);
+        btn_translate.setOnClickListener(Translate.this);
+    }
 
-        btn_translate.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String keyword = et_keyword.getText().toString();
-                setTranslation(keyword);
-            }
-        });
+    @Override
+    public void onClick(View v) {
+        String keyword = et_keyword.getText().toString();
+        setTranslation(keyword);
+    }
+    private class SetUpTask extends AsyncTask<Void,String,Void> {
+        private ProgressDialog d = new ProgressDialog(Translate.this);
+        @Override
+        protected void onPreExecute(){
+            d.setCancelable(false);
+            d.setTitle("Loading");
+            d.setMessage("Drinking with Pushkin...");
+            d.setMax(3);
+            d.show();
+        }
+        @Override
+        protected Void doInBackground(Void... params) {
+            ts = new TranslationService(Translate.this);
+            publishProgress("Consulting Tolstoy...");
+            ts.initDB();
+            publishProgress("Dueling with Gogol");
+            ts.open();
+            publishProgress("Arguing with Turgenyev...");
+            tts = new TextToSpeech(Translate.this, Translate.this);
+            return null;
+        }
+        @Override
+        protected void onProgressUpdate(String... strings){
+            d.setMessage(strings[0]);
+            d.setProgress(d.getProgress() + 1);
+        }
+        @Override
+        protected void onPostExecute(Void v){
+            if (d.isShowing())
+                d.dismiss();
+        }
     }
 
     public void setTranslation(String keyword) {
@@ -150,35 +182,53 @@ public class Translate extends ActionBarActivity implements
                           Editable output, final XMLReader xmlReader){
         int l = output.length();
         if (opening){
-           if (tag == "ex"){
+           if (tag.equalsIgnoreCase("ex")){
                output.setSpan(new RelativeSizeSpan(0.8f),
                        output.length(), output.length(), Spannable.SPAN_MARK_MARK);
-           } else if (tag == "kref"){
+           } else if (tag.equalsIgnoreCase("kref")){
                output.setSpan(new ReferenceLink(""),l,l, Spannable.SPAN_MARK_MARK);
 
-           } else if (tag == "k"){
+           } else if (tag.equalsIgnoreCase("k")){
                output.setSpan(new StyleSpan(Typeface.BOLD),l,l,Spannable.SPAN_MARK_MARK);
-           } else if (tag == "dtrn"){
+           } else if (tag.equalsIgnoreCase("dtrn")){
                output.setSpan(new SpeechLink(""), l,l,Spannable.SPAN_MARK_MARK);
            }
         } else {
-           if (tag == "ex"){
+           if (tag.equalsIgnoreCase("ex")){
                int where = getLast(output, RelativeSizeSpan.class);
                output.setSpan(new ForegroundColorSpan(Color.parseColor("#aaaaaa")),
                        where, l, 0);
                output.setSpan(new RelativeSizeSpan(0.8f), where, l, 0);
-           } else if (tag == "kref"){
+           } else if (tag.equalsIgnoreCase("kref")){
                int where = getLast(output, ReferenceLink.class);
                output.setSpan(new ReferenceLink(output.subSequence(where, l)), where, l, 0);
-           } else if (tag == "k"){
+           } else if (tag.equalsIgnoreCase("k")){
                int where = getLast(output, StyleSpan.class);
                output.setSpan(new StyleSpan(Typeface.BOLD), where, l, 0);
                output.setSpan(new RelativeSizeSpan(1.25f), where, l, 0);
-           } else if (tag == "dtrn"){
+               handleTtsSpans(output, where, l);
+           } else if (tag.equalsIgnoreCase("dtrn")){
                int where = getLast(output, SpeechLink.class);
                handleTtsSpans(output, where, l);
            }
         }
+    }
+
+    public void apologize(){
+        AlertDialog aDial = new AlertDialog.Builder(this).create();
+        aDial.setCancelable(true);
+        aDial.setTitle("Sorry, I'm not actually ready yet");
+        aDial.setMessage("The word you entered isn't in the dictionary. "
+                + "Normally we'd try to convert it to dictionary form first "
+                + "but that feature hasn't loaded yet. You can try again in a few" +
+                " seconds, or try putting it into dictionary form on your own");
+        aDial.setButton(DialogInterface.BUTTON_POSITIVE, "Okay", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        aDial.show();
     }
 
     private void handleTtsSpans(Editable text, int start, int end){
@@ -186,10 +236,11 @@ public class Translate extends ActionBarActivity implements
         String target = full.substring(start, end);
         String trimmed = target.replaceAll("\\(([^\\)]+)\\)", "");
         trimmed = trimmed.replaceAll("\\w+\\.","");
+        trimmed = trimmed.replaceAll("[a-zA-Z]","");
         String[] defs = trimmed.split(";|,|-");
         for (String def: defs){
             def = def.trim();
-            if(!def.matches(".*[a-zA-Z].*") && def.length() > 0){
+            if(TranslationService.isRussian(def) && def.length() > 0){
                 int s = full.indexOf(def, start);
                 text.setSpan(new SpeechLink(def),s, s+def.length(), 0);
             }
