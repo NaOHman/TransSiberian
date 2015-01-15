@@ -14,7 +14,6 @@
             android:layout_height="fill_parent"
             android:gravity="start"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Large Text"
             android:id="@+id/tv_translation"
             android:layout_weight="0"
             android:linksClickable="true" />
