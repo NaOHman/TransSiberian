@@ -1,14 +1,8 @@
 package com.naohman.language.transsiberian;
 
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.SpannedString;
-import android.text.TextUtils;
 import android.text.style.LeadingMarginSpan;
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +86,7 @@ public class DictHeading {
      * current prefix. ex. <b>II</b> => <b>III</b>
      */
     private static String nextPrefix(int level, String current){
-        String next = "";
+        String next;
         switch (level) {
             case 0:
                 next = current.replaceAll("</?b>", "");

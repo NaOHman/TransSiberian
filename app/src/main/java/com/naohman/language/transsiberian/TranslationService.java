@@ -20,12 +20,12 @@ import java.util.List;
  * open before using it and close when one is done with it
  */
 public class TranslationService {
+    private static TranslationService instance = null;
     private SQLiteDatabase database;
     private DBHelper dbHelper;
     private EnglishLuceneMorphology engMorph;
     private RussianLuceneMorphology rusMorph;
     private static final String[] TRANSLATION_COLS = {"keyword", "definition"};
-    private Context ctx;
     private Thread tRus;
     private Thread tEng;
 
@@ -41,14 +41,129 @@ public class TranslationService {
         return isR;
     }
 
-    public TranslationService(Context context){
-        this.ctx = context;
+    private TranslationService(){
         Runnable rusTask = new makeRus();
         Runnable engTask = new makeEng();
         tRus = new Thread(rusTask);
         tEng = new Thread(engTask);
         tRus.start();
         tEng.start();
+    }
+
+    public static TranslationService getInstance(){
+        if (instance == null)
+            instance = new TranslationService();
+        return instance;
+    }
+
+    public void initDB(Context ctx){
+        dbHelper = new DBHelper(ctx);
+    }
+
+    //initialize DB connection
+    public void open(){
+        database = dbHelper.getReadableDatabase();
+    }
+    //close DB connection
+    public void close(){
+        database.close();
+    }
+
+    //Take DB entries and format them in android HTML
+    private Spannable formatResponse(List<String> responses, Html.TagHandler handler){
+        SpannableStringBuilder s = new SpannableStringBuilder();
+        for (String response : responses) {
+            response = response.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
+            response = response.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
+            DictHeading h = new DictHeading(response, 0, handler); //parse structure
+            s = s.append(h.toSpan()).append("\n");
+        }
+        return s;
+    }
+
+    /*
+     * returns the dictionary form of a word
+     */
+    public List<String> getDictionaryForms(String keyword) {
+        keyword = keyword.replaceAll("to\\s*", "");
+        String[] words = keyword.split("\\s");
+        List<String> baseforms = new ArrayList<>();
+        for (String word : words) {
+            if (isRussian(word)) {
+                if (tRus.isAlive())
+                    throw new IllegalAccessError("Russian");
+                baseforms.addAll(rusMorph.getNormalForms(word));
+            } else {
+                if (tEng.isAlive())
+                    throw new IllegalAccessError("English");
+                baseforms.addAll(engMorph.getNormalForms(word));
+            }
+        }
+        return baseforms;
+    }
+
+    /*
+     * Queries the database to find translations for given words.
+     * If it can't find a word, it tries to put word into 'dictionary form'
+     * and tries again before giving up.
+     */
+    public Spannable getTranslations(String keyword, Html.TagHandler h){
+        keyword = keyword.toLowerCase();
+        Cursor cursor = queryKeyword(keyword);
+        if (cursor.getCount() == 0) {
+            List<String> morphs = getDictionaryForms(keyword);
+            List<String> response = new ArrayList<>();
+            if (morphs == null){
+                return null;
+            }
+            for(String morph: morphs){
+                cursor = queryKeyword(morph);
+                response.addAll(getColumns(cursor, 1));
+            }
+            return formatResponse(response, h);
+        }
+        return formatResponse(getColumns(cursor, 1), h);
+
+    }
+
+    /*
+     * returns a cursor representing a DB query for the
+     * specified keyword
+     */
+    private Cursor queryKeyword(String keyword){
+        String [] whereArgs = {keyword};
+        Cursor cursor;
+        if (isRussian(keyword)){
+            cursor = database.query(DBHelper.TABLE_RE,
+                    TRANSLATION_COLS, "keyword=?", whereArgs,
+                    null, null, null);
+        } else {
+            cursor = database.query(DBHelper.TABLE_ER,
+                    TRANSLATION_COLS, "keyword=? COLLATE NOCASE", whereArgs,
+                    null, null, null);
+        }
+        return cursor;
+    }
+
+    /*
+     * returns all the entries in a column that a cursor points to
+     */
+    private List<String> getColumns(Cursor c, int col){
+        List<String> entries = new ArrayList<>();
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            String response = c.getString(col);
+            entries.add(response);
+            int maxLogSize = 1000;
+            for(int i = 0; i <= response.length() / maxLogSize; i++) {
+                int start = i * maxLogSize;
+                int end = (i+1) * maxLogSize;
+                end = end > response.length() ? response.length() : end;
+                Log.v("Dict Entry", response.substring(start, end));
+            }
+            c.moveToNext();
+        }
+        return entries;
     }
 
     private class makeEng implements Runnable {
@@ -72,116 +187,4 @@ public class TranslationService {
         }
     }
 
-    public void initDB(){
-        dbHelper = new DBHelper(this.ctx);
-    }
-
-    //initialize DB connection
-    public void open(){
-        database = dbHelper.getReadableDatabase();
-    }
-    //close DB connection
-    public void close(){
-        database.close();
-    }
-
-    //Take DB entries and format them in android HTML
-    private Spannable formatResponse(String response){
-        response = response.replaceAll("<rref>.+</rref>", ""); //remove reference to external resources
-        response = response.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-        DictHeading h = new DictHeading(response, 0, (Translate) ctx); //parse structure
-        return h.toSpan();
-    }
-
-    /*
-     * returns the dictionary form of a word
-     */
-    public List<String> getDictionaryForms(String keyword, boolean isRussian){
-        keyword = keyword.replaceAll("to\\s*","");
-        try {
-            if (isRussian) {
-                if (tRus.isAlive()) {
-                    ((Translate)ctx).apologize();
-                    return null;
-                }else {
-                    return rusMorph.getNormalForms(keyword);
-                }
-            } else {
-                if (tEng.isAlive()){
-                    ((Translate)ctx).apologize();
-                    return null;
-                }else {
-                    return engMorph.getNormalForms(keyword);
-                }
-            }
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /*
-     * Queries the database to find translations for given words.
-     * If it can't find a word, it tries to put word into 'dictionary form'
-     * and tries again before giving up.
-     */
-    public Spannable getTranslations(String keyword){
-        keyword = keyword.toLowerCase();
-        boolean isRussian = isRussian(keyword);
-        Cursor cursor = queryKeyword(keyword, isRussian);
-        if (cursor.getCount() == 0) {
-            List<String> morphs = getDictionaryForms(keyword, isRussian);
-            List<Spannable> response = new ArrayList<>();
-            if (morphs == null){
-                return null;
-            }
-            for(String morph: morphs){
-                cursor = queryKeyword(morph, isRussian);
-                response.addAll(getColumns(cursor, 1));
-            }
-            return concatSpans(response);
-        }
-        return concatSpans(getColumns(cursor, 1));
-
-    }
-
-    /*
-     * returns a cursor representing a DB query for the
-     * specified keyword
-     */
-    private Cursor queryKeyword(String keyword, boolean isRussian){
-        String [] whereArgs = {keyword};
-        Cursor cursor;
-        if (isRussian){
-            cursor = database.query(DBHelper.TABLE_RE,
-                    TRANSLATION_COLS, "keyword=?", whereArgs,
-                    null, null, null);
-        } else {
-            cursor = database.query(DBHelper.TABLE_ER,
-                    TRANSLATION_COLS, "keyword=?", whereArgs,
-                    null, null, null);
-        }
-        return cursor;
-    }
-
-    /*
-     * returns all the entries in a column that a cursor points to
-     */
-    private List<Spannable> getColumns(Cursor c, int col){
-        List<Spannable> entries = new ArrayList<>();
-        c.moveToFirst();
-        while (!c.isAfterLast()) {
-            String response = c.getString(col);
-            entries.add(formatResponse(response));
-            c.moveToNext();
-        }
-        return entries;
-    }
-
-    private Spannable concatSpans(List<Spannable> spans){
-        SpannableStringBuilder s = new SpannableStringBuilder();
-        for (Spannable span : spans){
-            s.append(span).append(Html.fromHtml("<br>"));
-        }
-        return s;
-    }
 }

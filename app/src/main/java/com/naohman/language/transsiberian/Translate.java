@@ -1,39 +1,29 @@
 package com.naohman.language.transsiberian;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.xml.sax.XMLReader;
-
 import java.util.Locale;
 import java.util.Stack;
 
 public class Translate extends ActionBarActivity implements
-        TextToSpeech.OnInitListener, Html.TagHandler, View.OnClickListener{
+        TextToSpeech.OnInitListener, View.OnClickListener, SpanListener{
     private EditText et_keyword;
     private Button btn_translate;
     private TextView tv_translation;
@@ -46,9 +36,14 @@ public class Translate extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         new SetUpTask().execute();
+    }
+
+    public void initLayout(){
         setContentView(R.layout.activity_translate);
+        getSupportActionBar().show();
         et_keyword = (EditText) findViewById(R.id.et_keyword);
         btn_translate = (Button) findViewById(R.id.btn_translate);
         sv_translation = (ScrollView) findViewById(R.id.sv_translation);
@@ -62,22 +57,26 @@ public class Translate extends ActionBarActivity implements
         String keyword = et_keyword.getText().toString();
         setTranslation(keyword);
     }
+
     private class SetUpTask extends AsyncTask<Void,String,Void> {
-        private ProgressDialog d = new ProgressDialog(Translate.this);
+        private TextView tv_message;
+        private ProgressBar pb_loading;
         @Override
         protected void onPreExecute(){
-            d.setCancelable(false);
-            d.setTitle("Loading");
-            d.setMessage("Drinking with Pushkin...");
-            d.setMax(3);
-            d.show();
+            setContentView(R.layout.splash);
+            getSupportActionBar().hide();
+            tv_message = (TextView) findViewById(R.id.load_message);
+            pb_loading = (ProgressBar) findViewById(R.id.loading);
+            pb_loading.setIndeterminate(true);
+            pb_loading.setVisibility(View.VISIBLE);
+            tv_message.setText("Drinking with Gogol...");
         }
         @Override
         protected Void doInBackground(Void... params) {
-            ts = new TranslationService(Translate.this);
+            ts = TranslationService.getInstance();
             publishProgress("Consulting Tolstoy...");
-            ts.initDB();
-            publishProgress("Dueling with Gogol");
+            ts.initDB(Translate.this);
+            publishProgress("Dueling with Pushkin");
             ts.open();
             publishProgress("Arguing with Turgenyev...");
             tts = new TextToSpeech(Translate.this, Translate.this);
@@ -85,23 +84,25 @@ public class Translate extends ActionBarActivity implements
         }
         @Override
         protected void onProgressUpdate(String... strings){
-            d.setMessage(strings[0]);
-            d.setProgress(d.getProgress() + 1);
+            tv_message.setText(strings[0]);
         }
         @Override
         protected void onPostExecute(Void v){
-            if (d.isShowing())
-                d.dismiss();
+            Translate.this.initLayout();
         }
     }
 
     public void setTranslation(String keyword) {
-        Spannable translations = ts.getTranslations(keyword);
-        if (translations == null || translations.length() == 0){
-            setTranslation((Spannable) null);
-            return;
+        try {
+            Spannable translations = ts.getTranslations(keyword, new DictTagHandler(this));
+            if (translations == null || translations.length() == 0){
+                setTranslation((Spannable) null);
+                return;
+            }
+            setTranslation(translations);
+        } catch (IllegalAccessError e) {
+            apologize();
         }
-        setTranslation(translations);
     }
 
     public void setTranslation(Spannable translations){
@@ -114,6 +115,21 @@ public class Translate extends ActionBarActivity implements
         if (currentTranslation != null)
             previous.push(currentTranslation);
         currentTranslation = translations;
+    }
+
+    @Override
+    public void onReferenceClick(View v, String word){
+        setTranslation(word);
+    }
+
+    @Override
+    public void onDefinitionClick(View v, String word){
+            if (isTts) {
+                say(word);
+            } else {
+                Toast t = Toast.makeText(Translate.this, "Text To Speech is unavailable", Toast.LENGTH_LONG);
+                t.show();
+            }
     }
 
     @Override
@@ -177,43 +193,6 @@ public class Translate extends ActionBarActivity implements
         }
     }
 
-    @Override
-    public void handleTag(final boolean opening, final String tag,
-                          Editable output, final XMLReader xmlReader){
-        int l = output.length();
-        if (opening){
-           if (tag.equalsIgnoreCase("ex")){
-               output.setSpan(new RelativeSizeSpan(0.8f),
-                       output.length(), output.length(), Spannable.SPAN_MARK_MARK);
-           } else if (tag.equalsIgnoreCase("kref")){
-               output.setSpan(new ReferenceLink(""),l,l, Spannable.SPAN_MARK_MARK);
-
-           } else if (tag.equalsIgnoreCase("k")){
-               output.setSpan(new StyleSpan(Typeface.BOLD),l,l,Spannable.SPAN_MARK_MARK);
-           } else if (tag.equalsIgnoreCase("dtrn")){
-               output.setSpan(new SpeechLink(""), l,l,Spannable.SPAN_MARK_MARK);
-           }
-        } else {
-           if (tag.equalsIgnoreCase("ex")){
-               int where = getLast(output, RelativeSizeSpan.class);
-               output.setSpan(new ForegroundColorSpan(Color.parseColor("#aaaaaa")),
-                       where, l, 0);
-               output.setSpan(new RelativeSizeSpan(0.8f), where, l, 0);
-           } else if (tag.equalsIgnoreCase("kref")){
-               int where = getLast(output, ReferenceLink.class);
-               output.setSpan(new ReferenceLink(output.subSequence(where, l)), where, l, 0);
-           } else if (tag.equalsIgnoreCase("k")){
-               int where = getLast(output, StyleSpan.class);
-               output.setSpan(new StyleSpan(Typeface.BOLD), where, l, 0);
-               output.setSpan(new RelativeSizeSpan(1.25f), where, l, 0);
-               handleTtsSpans(output, where, l);
-           } else if (tag.equalsIgnoreCase("dtrn")){
-               int where = getLast(output, SpeechLink.class);
-               handleTtsSpans(output, where, l);
-           }
-        }
-    }
-
     public void apologize(){
         AlertDialog aDial = new AlertDialog.Builder(this).create();
         aDial.setCancelable(true);
@@ -222,75 +201,19 @@ public class Translate extends ActionBarActivity implements
                 + "Normally we'd try to convert it to dictionary form first "
                 + "but that feature hasn't loaded yet. You can try again in a few" +
                 " seconds, or try putting it into dictionary form on your own");
-        aDial.setButton(DialogInterface.BUTTON_POSITIVE, "Okay", new DialogInterface.OnClickListener() {
+        aDial.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
+        aDial.setButton(DialogInterface.BUTTON_POSITIVE, "Try Again", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                Translate.this.onClick(Translate.this.btn_translate);
+            }
+        });
         aDial.show();
-    }
-
-    private void handleTtsSpans(Editable text, int start, int end){
-        String full = text.toString();
-        String target = full.substring(start, end);
-        String trimmed = target.replaceAll("\\(([^\\)]+)\\)", "");
-        trimmed = trimmed.replaceAll("\\w+\\.","");
-        trimmed = trimmed.replaceAll("[a-zA-Z]","");
-        String[] defs = trimmed.split(";|,|-");
-        for (String def: defs){
-            def = def.trim();
-            if(TranslationService.isRussian(def) && def.length() > 0){
-                int s = full.indexOf(def, start);
-                text.setSpan(new SpeechLink(def),s, s+def.length(), 0);
-            }
-        }
-    }
-
-    private int getLast(Editable text, Class kind) {
-        Object[] objs = text.getSpans(0, text.length(), kind);
-        if(objs.length == 0) {
-            return 0;
-        } else {
-            for (int i=objs.length; i > 0; i--) {
-                if(text.getSpanFlags(objs[i-1]) == Spannable.SPAN_MARK_MARK) {
-                    int j = text.getSpanEnd(objs[i-1]);
-                    text.removeSpan(objs[i-1]);
-                    if (j < 0)
-                        return 0;
-                    return j;
-                }
-            }
-            return 0;
-        }
-    }
-    private class ReferenceLink extends ClickableSpan {
-        private String link;
-        public ReferenceLink(CharSequence link) {
-            this.link = link.toString();
-        }
-        @Override
-        public void onClick(View widget) {
-            Log.d("Link Clicked", link);
-            setTranslation(link);
-        }
-    }
-
-    private class SpeechLink extends ClickableSpan {
-        private String word;
-        public SpeechLink(String word) {
-            this.word = word;
-            Log.d("Made Speech Link", word + word.length());
-        }
-        @Override
-        public void onClick(View widget) {
-            if (isTts) {
-                say(word);
-            } else {
-                Toast t = Toast.makeText(Translate.this, "Text To Speech is unavailable", Toast.LENGTH_LONG);
-                t.show();
-            }
-        }
-
     }
 }
