@@ -1,49 +1,41 @@
 package com.naohman.language.transsiberian;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
-import java.util.Locale;
+
+import java.util.List;
 import java.util.Stack;
 
 public class Translate extends ActionBarActivity implements
-        TextToSpeech.OnInitListener, View.OnClickListener, SpanListener{
+        View.OnClickListener, SpanListener{
     private EditText et_keyword;
     private Button btn_translate;
     private TextView tv_translation;
-    private TranslationService ts;
     private ScrollView sv_translation;
+    private ProgressBar pb_loading;
     private Stack<Spannable> previous = new Stack<>();
     private Spannable currentTranslation = null;
-    private TextToSpeech tts;
-    private boolean isTts = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
-        new SetUpTask().execute();
-    }
-
-    public void initLayout(){
         setContentView(R.layout.activity_translate);
-        getSupportActionBar().show();
+        pb_loading = (ProgressBar) findViewById(R.id.translations_loading);
+        pb_loading.setVisibility(View.INVISIBLE);
         et_keyword = (EditText) findViewById(R.id.et_keyword);
         btn_translate = (Button) findViewById(R.id.btn_translate);
         sv_translation = (ScrollView) findViewById(R.id.sv_translation);
@@ -58,51 +50,43 @@ public class Translate extends ActionBarActivity implements
         setTranslation(keyword);
     }
 
-    private class SetUpTask extends AsyncTask<Void,String,Void> {
-        private TextView tv_message;
-        private ProgressBar pb_loading;
-        @Override
-        protected void onPreExecute(){
-            setContentView(R.layout.splash);
-            getSupportActionBar().hide();
-            tv_message = (TextView) findViewById(R.id.load_message);
-            pb_loading = (ProgressBar) findViewById(R.id.loading);
-            pb_loading.setIndeterminate(true);
-            pb_loading.setVisibility(View.VISIBLE);
-            tv_message.setText("Drinking with Gogol...");
+
+    private Spannable makeSpan(List<DictHeading> headings){
+        SpannableStringBuilder s = new SpannableStringBuilder();
+        if (headings == null || headings.size() == 0){
+                setTranslation((Spannable) null);
+                return s.append("No Translations found");
         }
-        @Override
-        protected Void doInBackground(Void... params) {
-            ts = TranslationService.getInstance();
-            publishProgress("Consulting Tolstoy...");
-            ts.initDB(Translate.this);
-            publishProgress("Dueling with Pushkin");
-            ts.open();
-            publishProgress("Arguing with Turgenyev...");
-            tts = new TextToSpeech(Translate.this, Translate.this);
-            return null;
+        for (DictHeading h : headings){
+           s.append(h.toSpan(new DictTagHandler(this)))
+                   .append('\n');
         }
-        @Override
-        protected void onProgressUpdate(String... strings){
-            tv_message.setText(strings[0]);
-        }
-        @Override
-        protected void onPostExecute(Void v){
-            Translate.this.initLayout();
-        }
+        return s;
     }
 
     public void setTranslation(String keyword) {
-        try {
-            Spannable translations = ts.getTranslations(keyword, new DictTagHandler(this));
-            if (translations == null || translations.length() == 0){
-                setTranslation((Spannable) null);
-                return;
+        new AsyncTask<String,Void,Void>(){
+            List<DictHeading> headings;
+            @Override
+            protected void onPreExecute(){
+                pb_loading.setVisibility(View.VISIBLE);
+                tv_translation.setVisibility(View.INVISIBLE);
             }
-            setTranslation(translations);
-        } catch (IllegalAccessError e) {
-            apologize();
-        }
+            @Override
+            protected Void doInBackground(String... params) {
+                DictionaryHandler dictionary = DictionaryHandler.getInstance(null);
+                dictionary.open();
+                headings = dictionary.getTranslations(params[0]);
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Void v){
+                pb_loading.setVisibility(View.INVISIBLE);
+                tv_translation.setVisibility(View.VISIBLE);
+                Spannable s = makeSpan(headings);
+                setTranslation(s);
+            }
+        }.execute(keyword);
     }
 
     public void setTranslation(Spannable translations){
@@ -124,12 +108,9 @@ public class Translate extends ActionBarActivity implements
 
     @Override
     public void onDefinitionClick(View v, String word){
-            if (isTts) {
-                say(word);
-            } else {
-                Toast t = Toast.makeText(Translate.this, "Text To Speech is unavailable", Toast.LENGTH_LONG);
-                t.show();
-            }
+        Intent startDef = new Intent(this, Definition.class);
+        startDef.putExtra("keyword",word);
+        startActivity(startDef);
     }
 
     @Override
@@ -164,56 +145,9 @@ public class Translate extends ActionBarActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    public void onClose(){
-        if (tts != null){
-            tts.stop();
-            tts.shutdown();
-        }
-        ts.close();
-    }
-
-    public void say(String text){
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-    }
-
     @Override
-    public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
-            int result = tts.setLanguage(new Locale("ru","RU"));
-            if (result == TextToSpeech.LANG_MISSING_DATA
-                    || result == TextToSpeech.LANG_NOT_SUPPORTED){
-                Log.e("TTS", "This language is not supported");
-            } else {
-                Log.d("TTS", "Language is supported");
-                tts.setLanguage(new Locale("ru","RU"));
-                isTts = true;
-            }
-        } else {
-            Log.e("TTS", "Initialization failed");
-        }
-    }
-
-    public void apologize(){
-        AlertDialog aDial = new AlertDialog.Builder(this).create();
-        aDial.setCancelable(true);
-        aDial.setTitle("Sorry, I'm not actually ready yet");
-        aDial.setMessage("The word you entered isn't in the dictionary. "
-                + "Normally we'd try to convert it to dictionary form first "
-                + "but that feature hasn't loaded yet. You can try again in a few" +
-                " seconds, or try putting it into dictionary form on your own");
-        aDial.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        aDial.setButton(DialogInterface.BUTTON_POSITIVE, "Try Again", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                Translate.this.onClick(Translate.this.btn_translate);
-            }
-        });
-        aDial.show();
+    protected void onDestroy() {
+        DictionaryHandler.getInstance(null).close();
+        super.onDestroy();
     }
 }

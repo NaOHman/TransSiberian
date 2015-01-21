@@ -38,7 +38,7 @@ public class DictTagHandler implements Html.TagHandler {
            } else if (tag.equalsIgnoreCase("k")){
                output.setSpan(new StyleSpan(Typeface.BOLD),l,l,Spannable.SPAN_MARK_MARK);
            } else if (tag.equalsIgnoreCase("dtrn")){
-               output.setSpan(new SpeechLink(""), l,l,Spannable.SPAN_MARK_MARK);
+               output.setSpan(new DefinitionLink(""), l,l,Spannable.SPAN_MARK_MARK);
            }
         } else {
            if (tag.equalsIgnoreCase("ex")){
@@ -53,15 +53,16 @@ public class DictTagHandler implements Html.TagHandler {
                int where = getLast(output, StyleSpan.class);
                output.setSpan(new StyleSpan(Typeface.BOLD), where, l, 0);
                output.setSpan(new RelativeSizeSpan(1.25f), where, l, 0);
-               handleTtsSpans(output, where, l);
+               handleDefSpans(output, where, l);
            } else if (tag.equalsIgnoreCase("dtrn")){
-               int where = getLast(output, SpeechLink.class);
-               handleTtsSpans(output, where, l);
+               int where = getLast(output, DefinitionLink.class);
+               handleDefSpans(output, where, l);
            }
         }
     }
 
-    private void handleTtsSpans(Editable text, int start, int end){
+    private void handleDefSpans(Editable text, int start, int end){
+        //TODO handle (ся) split around some parenthesis/abbreviations
         String full = text.toString();
         String target = full.substring(start, end);
         String trimmed = target.replaceAll("\\(([^\\)]+)\\)", "");
@@ -70,9 +71,10 @@ public class DictTagHandler implements Html.TagHandler {
         String[] defs = trimmed.split(";|,|-");
         for (String def: defs){
             def = def.trim();
-            if(TranslationService.isRussian(def) && def.length() > 0){
+            if(DictionaryHandler.isRussian(def) && def.length() > 0){
                 int s = full.indexOf(def, start);
-                text.setSpan(new SpeechLink(def),s, s+def.length(), 0);
+                if (s> 0)
+                    text.setSpan(new DefinitionLink(def),s, s+def.length(), 0);
             }
         }
     }
@@ -107,9 +109,9 @@ public class DictTagHandler implements Html.TagHandler {
         }
     }
 
-    private class SpeechLink extends ClickableSpan {
+    private class DefinitionLink extends ClickableSpan {
         private String word;
-        public SpeechLink(String word) {
+        public DefinitionLink(String word) {
             this.word = word;
             Log.d("Made Speech Link", word + word.length());
         }

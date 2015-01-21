@@ -4,9 +4,16 @@
     android:layout_height="match_parent"
     android:background="#00004b">
 
+    <ImageSwitcher
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/train_switcher"
+        android:layout_gravity="center_vertical"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/loading_text"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="TransSiberian"
         android:id="@+id/textView"
@@ -14,23 +21,13 @@
         android:textColor="#FFFFFF"
         android:textSize="@dimen/abc_text_size_display_2_material"
         android:textIsSelectable="false" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/train"
-        android:layout_gravity="center_horizontal"
-        android:src="@drawable/train" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"
         android:layout_above="@+id/loading"
+        android:id="@+id/loading_text"
         android:layout_centerHorizontal="true"
-        android:text="Loading"
-        android:id="@+id/load_message" />
-
+        android:textColor="#FFFFFF"/>
     <ProgressBar
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"

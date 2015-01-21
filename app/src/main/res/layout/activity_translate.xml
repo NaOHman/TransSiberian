@@ -20,6 +20,13 @@
             android:layout_weight="0"
             android:linksClickable="true" />
     </ScrollView>
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:id="@+id/translations_loading"
+        android:layout_weight="0" />
     <LinearLayout
         android:id="@+id/myFooter"
         android:layout_alignParentBottom="true"

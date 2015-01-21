@@ -17,10 +17,8 @@ public class DictHeading {
     private static final String[] FIRST_PREFIX = {"<b>I</b>", "<b>1\\.</b>","1\\)","а\\)","a\\)"};
     private List<DictHeading> subHeadings;
     private String contents;
-    private Html.TagHandler handler;
 
-    public DictHeading(String text, int  prefixLevel, Html.TagHandler h){
-        this.handler = h;
+    public DictHeading(String text, int  prefixLevel){
         //no possible subheadings
         if (prefixLevel == MAX_PREFIX){
             this.contents = text;
@@ -41,7 +39,7 @@ public class DictHeading {
             this.contents = text;
         if (rawHeadings.size() > 1){
             for (int i=1; i<rawHeadings.size(); i++){
-                subHeadings.add(new DictHeading(rawHeadings.get(i), prefixLevel, h));
+                subHeadings.add(new DictHeading(rawHeadings.get(i), prefixLevel));
             }
         }
     }
@@ -66,16 +64,16 @@ public class DictHeading {
     /*
      * formats the dictionary entries in a way that preserves their structure
      */
-    public SpannableStringBuilder toSpan(){
-        return toSpan(0);
+    public SpannableStringBuilder toSpan(Html.TagHandler h){
+        return toSpan(0, h);
     }
 
-    private SpannableStringBuilder toSpan(int indent){
+    private SpannableStringBuilder toSpan(int indent, Html.TagHandler handler){
         SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("\u200B"+contents,null, handler);
         s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
         if (subHeadings != null) {
             for (DictHeading heading : subHeadings) {
-                s.append(heading.toSpan(indent + 40));
+                s.append(heading.toSpan(indent + 40, handler));
             }
         }
         return s;
