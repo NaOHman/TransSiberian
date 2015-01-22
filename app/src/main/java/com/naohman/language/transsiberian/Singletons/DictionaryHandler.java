@@ -1,12 +1,12 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Singletons;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
-import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
-import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
-import java.io.IOException;
+
+import com.naohman.language.transsiberian.Helpers.DBHelper;
+import com.naohman.language.transsiberian.Helpers.DictHeading;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,21 +22,14 @@ public class DictionaryHandler {
     private static DictionaryHandler instance;
     private static final String[] TRANSLATION_COLS = {"keyword", "definition"};
 
-    /*
-     * if there is a cyrillic character, assume that it's cyrillic
-     */
-    public static boolean isRussian(String s) {
-        return s.matches("[ а-яА-Я]+");
-    }
-
-    public static boolean isEnglish(String s) {
-        return s.matches("[ a-zA-Z]+");
-    }
 
     private DictionaryHandler(Context ctx) {
         dbHelper = new DBHelper(ctx);
     }
 
+    /*
+     * Potentially very costly, do not run on UI thread
+     */
     public static DictionaryHandler getInstance(Context appCtx){
         if (instance == null)
             synchronized (DictionaryHandler.class){
@@ -46,27 +39,45 @@ public class DictionaryHandler {
         return instance;
     }
 
-    //initialize DB connection
+    /*
+     * Initialize DB connection call this the first time you need the Dictionary
+     */
     public void open() {
         if (database == null)
             database = dbHelper.getReadableDatabase();
     }
 
-    //close DB connection
+    /*
+     * close DB connection call this when the DB is no longer active
+     */
     public void close() {
         if (database != null)
             database.close();
     }
 
-    //Take DB entries and format them in android HTML
-    private static List<DictHeading> parseDBEntry(List<String> responses) {
-        List<DictHeading> entries = new ArrayList<>();
-        for (String response : responses) {
-            response = response.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
-            response = response.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-            entries.add(new DictHeading(response, 0)); //parse structure
+    /*
+     * Queries the database to find translations for given words.
+     * If it can't find a word, it tries to put words into 'dictionary form'
+     * and tries again before giving up.
+     * Note that this is an expensive call and could possibly trigger other
+     * expensive operations
+     */
+    public List<DictHeading> getTranslations(String keyword) {
+        keyword = keyword.toLowerCase();
+        Cursor cursor = queryKeyword(keyword);
+        if (cursor.getCount() == 0) {
+            List<String> morphs = getDictionaryForms(keyword);
+            List<String> response = new ArrayList<>();
+            if (morphs == null) {
+                return null;
+            }
+            for (String morph : morphs) {
+                cursor = queryKeyword(morph);
+                response.addAll(getColumns(cursor, 1));
+            }
+            return parseDBEntry(response);
         }
-        return entries;
+        return parseDBEntry(getColumns(cursor, 1));
     }
 
     /*
@@ -91,27 +102,15 @@ public class DictionaryHandler {
         }
     }
 
-    /*
-     * Queries the database to find translations for given words.
-     * If it can't find a word, it tries to put word into 'dictionary form'
-     * and tries again before giving up.
-     */
-    public List<DictHeading> getTranslations(String keyword) {
-        keyword = keyword.toLowerCase();
-        Cursor cursor = queryKeyword(keyword);
-        if (cursor.getCount() == 0) {
-            List<String> morphs = getDictionaryForms(keyword);
-            List<String> response = new ArrayList<>();
-            if (morphs == null) {
-                return null;
-            }
-            for (String morph : morphs) {
-                cursor = queryKeyword(morph);
-                response.addAll(getColumns(cursor, 1));
-            }
-            return parseDBEntry(response);
+    //Take DB entries, clean them and turn them into DictHeadings
+    private static List<DictHeading> parseDBEntry(List<String> responses) {
+        List<DictHeading> entries = new ArrayList<>();
+        for (String response : responses) {
+            response = response.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
+            response = response.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
+            entries.add(new DictHeading(response, 0)); //parse structure
         }
-        return parseDBEntry(getColumns(cursor, 1));
+        return entries;
     }
 
     /*
@@ -145,5 +144,19 @@ public class DictionaryHandler {
             c.moveToNext();
         }
         return entries;
+    }
+
+    /*
+     * matches Cyrillic characters and spaces
+     */
+    public static boolean isRussian(String s) {
+        return s.matches("[ а-яА-Я]+");
+    }
+
+    /*
+     * matches Roman characters and spaces
+     */
+    public static boolean isEnglish(String s) {
+        return s.matches("[ a-zA-Z]+");
     }
 }

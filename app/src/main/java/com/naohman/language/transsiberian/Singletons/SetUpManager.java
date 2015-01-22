@@ -1,8 +1,6 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Singletons;
 
 import android.content.Context;
-
-import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -11,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jeffrey on 1/21/15.
+ * A thread pool that runs setup tasks on initialization;
  */
 public class SetUpManager {
     private int threadCount;
@@ -28,20 +27,27 @@ public class SetUpManager {
         setUpTasks(appCtx);
     }
 
-    public void shutDown(){
-
-    }
-
-    public void post(Runnable r){
-        executor.execute(r);
-    }
-
     public static SetUpManager getInstance(Context appCtx){
         if (instance == null)
             instance = new SetUpManager(appCtx);
         return instance;
     }
 
+    public void shutDown(){
+        //TODO cancel all threads
+    }
+
+    /*
+     * Add a new Runnable to the pool
+     */
+    public void post(Runnable r){
+        executor.execute(r);
+    }
+
+
+    /*
+     * start-up tasks
+     */
     private void setUpTasks(final Context appCtx){
         executor.execute(new Runnable() {
             @Override

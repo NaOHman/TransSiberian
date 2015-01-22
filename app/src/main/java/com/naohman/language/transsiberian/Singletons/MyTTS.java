@@ -1,4 +1,4 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Singletons;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
@@ -18,6 +18,9 @@ public class MyTTS implements  TextToSpeech.OnInitListener{
         tts = new TextToSpeech(c, this);
     }
 
+    /*
+     * Potentially costly, avoid running on UI thread
+     */
     public static MyTTS getInstance(Context appCtx){
         if (instance == null)
             synchronized (MyTTS.class){
@@ -27,6 +30,9 @@ public class MyTTS implements  TextToSpeech.OnInitListener{
         return instance;
     }
 
+    /*
+     * Returns true if TTS is available, false if it is not
+     */
     public boolean say(String word){
         if(isTts){
             tts.speak(word, TextToSpeech.QUEUE_FLUSH, null);

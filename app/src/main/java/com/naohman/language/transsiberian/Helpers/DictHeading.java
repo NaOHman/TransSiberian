@@ -1,4 +1,4 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Helpers;
 
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -117,20 +117,4 @@ public class DictHeading {
         current = current.replaceAll("IXI","X");
         return  current;
     }
-                /*
-            Syn: synonymns
-            1. 1) aбв) abc)
-            сущ Noun
-            межд,
-            гл. verb
-            прил. adjective
-            нареч. adverb
-            разг. colloquial
-            предл. preposition
-            <k> = keyword
-            <tr> = phonetic keyword
-            <c> <co> <i> = formatting
-            <abr> = abbreviation
-            <dtrn> = translations
-             */
 }

@@ -1,9 +1,9 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Singletons;
 
 import android.content.Context;
 import android.util.Log;
 
-import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
+import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,11 +15,16 @@ import java.util.List;
 /**
  * Created by jeffrey on 1/21/15.
  */
-public class EngMorph {
-    private EnglishLuceneMorphology morphology;
-    private static EngMorph instance;
+public class RusMorph {
+    private RussianLuceneMorphology morphology;
+    private static RusMorph instance;
 
-    private EngMorph(final Context appCtx){
+    /*
+     * Creating Morphology objects is very expensive, do not do it
+     * on the UI thread. Objects are saved in serialized form to
+     * improve loading time
+     */
+    private RusMorph(final Context appCtx){
         final File suspend_f = new File(appCtx.getFilesDir(), "rusMorph");
         if (suspend_f.exists()) {
             FileInputStream fis = null;
@@ -27,7 +32,7 @@ public class EngMorph {
             try {
                 fis = new FileInputStream(suspend_f);
                 is = new ObjectInputStream(fis);
-                morphology = (EnglishLuceneMorphology) is.readObject();
+                morphology = (RussianLuceneMorphology) is.readObject();
             } catch (Exception e) {
                 Log.e("READ ERROR", e.getMessage());
             } finally {
@@ -40,32 +45,32 @@ public class EngMorph {
             }
         } else {
             try {
-                morphology = new EnglishLuceneMorphology();
-                saveMorph(appCtx, morphology);
+                morphology = new RussianLuceneMorphology();
+                saveRusMorph(appCtx);
             } catch (Exception e) {
                 Log.e("Problem creating Morphology", e.getMessage());
             }
         }
     }
 
-    public static EngMorph getInstance(final Context appCtx){
+    public static RusMorph getInstance(final Context appCtx){
         if (instance == null)
-            synchronized (EngMorph.class){
+            synchronized (RusMorph.class){
                 if (instance == null)
-                    instance = new EngMorph(appCtx);
+                    instance = new RusMorph(appCtx);
             }
         return instance;
     }
 
-    private static void saveMorph(Context c, EnglishLuceneMorphology morph){
-        final File savedFile = new File(c.getFilesDir(), "engMorph");
+    private void saveRusMorph(Context c){
+        final File savedFile = new File(c.getFilesDir(), "rusMorph");
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         boolean keep = true;
         try {
             fos = new FileOutputStream(savedFile);
             oos = new ObjectOutputStream(fos);
-            oos.writeObject(morph);
+            oos.writeObject(morphology);
         } catch (Exception e){
             keep = false;
         } finally {

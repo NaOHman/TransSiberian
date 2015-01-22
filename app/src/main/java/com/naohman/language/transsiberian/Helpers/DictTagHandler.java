@@ -1,4 +1,4 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Helpers;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,6 +11,9 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
+
+import com.naohman.language.transsiberian.Helpers.SpanListener;
+import com.naohman.language.transsiberian.Singletons.DictionaryHandler;
 
 import org.xml.sax.XMLReader;
 
@@ -27,6 +30,8 @@ public class DictTagHandler implements Html.TagHandler {
     @Override
     public void handleTag(final boolean opening, final String tag,
                           Editable output, final XMLReader xmlReader){
+        //Todo save definitions?
+        //make keywords happen
         int l = output.length();
         if (opening){
            if (tag.equalsIgnoreCase("ex")){

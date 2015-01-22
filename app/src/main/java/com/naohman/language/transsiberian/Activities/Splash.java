@@ -1,10 +1,9 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Activities;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.*;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -14,8 +13,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.ViewSwitcher;
 
+import com.naohman.language.transsiberian.R;
+import com.naohman.language.transsiberian.Singletons.SetUpManager;
+
 /**
  * Created by jeffrey on 1/19/15.
+ * Splash screen that shows a train running across the screen
+ * Also begins the process of initialization
  */
 public class Splash extends Activity implements ViewSwitcher.ViewFactory{
     private ProgressBar pb_loading;

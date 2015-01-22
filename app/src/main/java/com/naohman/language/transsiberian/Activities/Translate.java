@@ -1,4 +1,4 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Activities;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -16,11 +16,17 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.naohman.language.transsiberian.Helpers.DictHeading;
+import com.naohman.language.transsiberian.Helpers.DictTagHandler;
+import com.naohman.language.transsiberian.Singletons.DictionaryHandler;
+import com.naohman.language.transsiberian.R;
+import com.naohman.language.transsiberian.Helpers.SpanListener;
+
 import java.util.List;
 import java.util.Stack;
 
 public class Translate extends ActionBarActivity implements
-        View.OnClickListener, SpanListener{
+        View.OnClickListener, SpanListener {
     private EditText et_keyword;
     private Button btn_translate;
     private TextView tv_translation;

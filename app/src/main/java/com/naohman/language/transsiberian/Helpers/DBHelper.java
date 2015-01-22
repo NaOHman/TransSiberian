@@ -1,4 +1,4 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Helpers;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -18,11 +18,16 @@ public class DBHelper extends SQLiteAssetHelper {
     public static final String TABLE_ER = "er";
     private static final int DB_VERSION = 2;
 
+    /*
+     * Note this method may be very expensive if the database
+     * does not already exist
+     */
     public DBHelper(Context context) {
         super(context, DB_NAME,getDir(context), null, DB_VERSION);
         setForcedUpgrade();
     }
 
+    //Todo make this more robust perhaps allow the use of preferences
     private static String getDir(Context c){
         File dir = c.getExternalFilesDir(null);
         if (dir == null)

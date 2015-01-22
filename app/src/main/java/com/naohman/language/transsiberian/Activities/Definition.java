@@ -1,24 +1,20 @@
-package com.naohman.language.transsiberian;
+package com.naohman.language.transsiberian.Activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.speech.tts.TextToSpeech;
+import android.os.*;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageSwitcher;
@@ -27,35 +23,41 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
+
+import com.naohman.language.transsiberian.Singletons.MyTTS;
+import com.naohman.language.transsiberian.R;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
-public class Definition extends ActionBarActivity {
+/*
+ * Created by Jeffrey Lyman
+ * An activity for displaying a chosen keyword-definition pair
+ * Shows the results of google image searches for the keyword
+ * TODO quizlet integration, pairing
+ */
+public class Definition extends ActionBarActivity implements View.OnClickListener,
+        ViewSwitcher.ViewFactory, View.OnTouchListener{
     public static final String QUERY_URL ="https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=%s&imgsz=medium";
-    private List<Drawable> imgs;
-    private int position = -2;
+    private List<Drawable> imgs = new ArrayList<>();
+    private int position = -2, minSwipe;
     private ImageSwitcher switcher;
     private ProgressBar pb;
     private String keyword;
     float initialX;
+    private static Animation lIn, lOut, rIn, rOut;
     private TextView tv_keyword;
-    //include pair
-    //quizlet integration
-    //loading spinner
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,83 +65,79 @@ public class Definition extends ActionBarActivity {
         setContentView(R.layout.activity_definition);
         Intent intent = getIntent();
         keyword = intent.getStringExtra("keyword");
-        imgs = new ArrayList<>();
         getImages(keyword);
         pb = (ProgressBar) findViewById(R.id.switcher_loading);
+        pb.setVisibility(View.VISIBLE);
         tv_keyword = (TextView) findViewById(R.id.definition);
         tv_keyword.setText(keyword);
-        tv_keyword.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                say(keyword);
-            }
-        });
+        tv_keyword.setOnClickListener(this);
         switcher = (ImageSwitcher) findViewById(R.id.image_switcher);
         switcher.setVisibility(View.INVISIBLE);
-        pb.setVisibility(View.VISIBLE);
-        switcher.setFactory(new ViewSwitcher.ViewFactory() {
-            @Override
-            public View makeView() {
-                ImageView myView = new ImageView(getApplicationContext());
-                myView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                myView.setLayoutParams(new ImageSwitcher.LayoutParams
-                        (ViewGroup.LayoutParams.MATCH_PARENT,
-                         ViewGroup.LayoutParams.MATCH_PARENT));
-                return myView;
-            }
-        });
-        switcher.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = event.getX();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        float finalX = event.getX();
-                        int minSwipe = switcher.getWidth() / 3;
-                        if (Math.abs(finalX - initialX) > minSwipe) {
-                            if (initialX > finalX) {
-                                previous();
-                            } else {
-                                next();
-                            }
-                        }
-                        break;
-               }
-               return true;
-            }
-        });
+        switcher.setFactory(this);
+        switcher.setOnTouchListener(this);
+        minSwipe = switcher.getWidth() / 3;
+        lIn = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
+        lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+        rIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_right);
+        rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
     }
 
-    public void say(String text){
-        if (!MyTTS.getInstance(null).say(text)) {
-            Toast t = Toast.makeText(this, "Text To Speech is unavailable", Toast.LENGTH_LONG);
-            t.show();
-        }
+    @Override
+    public void onClick(View v){
+        new AsyncTask<String, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(String... params) {
+                return MyTTS.getInstance(null).say(params[0]);
+            }
+            @Override
+            protected void onPostExecute(Boolean success) {
+                if (!success){
+                    Toast t=Toast.makeText(Definition.this,
+                            "Text To Speech is unavailable",Toast.LENGTH_LONG);
+                    t.show();
+                }
+            }
+        }.execute(keyword);
     }
 
-    public void next(){
-        if (!imgs.isEmpty()) {
-            position = position == imgs.size() - 1 ? 0 : position + 1;
-            Animation in = AnimationUtils.loadAnimation(this,
-                    android.R.anim.slide_in_left);
-            Animation out = AnimationUtils.loadAnimation(this,
-                    android.R.anim.slide_out_right);
-            switcher.setInAnimation(in);
-            switcher.setOutAnimation(out);
-            switcher.setImageDrawable(imgs.get(position));
-        }
+    @Override
+    public View makeView() {
+        ImageView myView = new ImageView(getApplicationContext());
+        myView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        myView.setLayoutParams(new ImageSwitcher.LayoutParams
+                (ViewGroup.LayoutParams.MATCH_PARENT,
+                 ViewGroup.LayoutParams.MATCH_PARENT));
+        return myView;
     }
-    public void previous(){
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            initialX = event.getX();
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            float finalX = event.getX();
+            if (Math.abs(finalX - initialX) > minSwipe) {
+                changeImage(initialX > finalX);
+            }
+        }
+        return true;
+    }
+
+    /*
+     * change the image shown by the Image switcher, if next is true the image
+     * will come in from the left, otherwise it will come in from the left
+     */
+    public void changeImage(boolean next){
         if (!imgs.isEmpty()) {
-            position = position == 0 ? imgs.size() - 1 : position - 1;
-            Animation in = AnimationUtils.loadAnimation(this,
-                    R.anim.slide_in_right);
-            Animation out = AnimationUtils.loadAnimation(this,
-                    R.anim.slide_out_left);
-            switcher.setInAnimation(in);
-            switcher.setOutAnimation(out);
+            if (next) {
+                position = position == imgs.size() - 1 ? 0 : position + 1;
+                switcher.setInAnimation(lIn);
+                switcher.setOutAnimation(lOut);
+            } else {
+                position = position == 0 ? imgs.size() - 1 : position - 1;
+                switcher.setInAnimation(rIn);
+                switcher.setOutAnimation(rOut);
+            }
             switcher.setImageDrawable(imgs.get(position));
         }
     }
@@ -173,12 +171,12 @@ public class Definition extends ActionBarActivity {
         if (networkInfo != null && networkInfo.isConnected()){
             new FetchImage().execute(keyword);
         } else {
+            //Todo show network error where image switcher was
             Log.e("CONNECTIVITY", "Not Connected to Internet");
         }
     }
 
     private class FetchImage extends AsyncTask<String, Drawable, Void> {
-
         @Override
         protected Void doInBackground(String... params) {
             try {
@@ -214,7 +212,7 @@ public class Definition extends ActionBarActivity {
                 position = -1;
                 switcher.setVisibility(View.VISIBLE);
                 pb.setVisibility(View.INVISIBLE);
-                next();
+                changeImage(true);
             }
         }
 

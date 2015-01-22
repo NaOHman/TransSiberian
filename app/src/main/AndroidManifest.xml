@@ -13,7 +13,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".Splash"
+            android:name=".Activities.Splash"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:label="@string/app_name" >
             <intent-filter>
@@ -23,11 +23,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Definition"
+            android:name=".Activities.Definition"
             android:label="@string/title_activity_definition" >
         </activity>
         <activity
-            android:name=".Translate"
+            android:name=".Activities.Translate"
             android:label="@string/title_activity_translate" >
         </activity>
     </application>
