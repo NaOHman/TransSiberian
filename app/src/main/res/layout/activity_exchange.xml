@@ -1,0 +1,84 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.naohman.language.transsiberian.Activities.Exchange">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="4"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="Dollars"
+                android:layout_weight="45"
+                android:onClick="swap"
+                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:id="@+id/input_label"/>
+            <Space
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="10"
+                />
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:onClick="swap"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="Rubles"
+                android:layout_weight="45"
+                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:id="@+id/output_label"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_weight="3"
+            android:layout_height="0dip"
+            android:orientation="horizontal">
+            <EditText
+                android:layout_width="0dip"
+                android:layout_weight="45"
+                android:id="@+id/currency_et"
+                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionGo"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:layout_width="0dip"
+                android:layout_weight="10"
+                android:src="@drawable/ic_action_forward"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:text=">"
+                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:layout_width="0dip"
+                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:layout_weight="45"
+                android:gravity="center_vertical|center_horizontal"
+                android:id="@+id/currency_tv"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
+    <Button
+        android:layout_width="fill_parent"
+        android:text="Convert"
+        android:layout_weight="2"
+        android:onClick="convert"
+        android:background="#00004b"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/abc_text_size_display_1_material"
+        android:id="@+id/convert"
+        android:layout_height="0dip" />
+
+
+</LinearLayout>

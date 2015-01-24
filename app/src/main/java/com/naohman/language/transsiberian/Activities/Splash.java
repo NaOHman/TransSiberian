@@ -48,7 +48,7 @@ public class Splash extends Activity implements ViewSwitcher.ViewFactory{
             return new Runnable() {
                 @Override
                 public void run() {
-                    Intent intent = new Intent(Splash.this, Translate.class);
+                    Intent intent = new Intent(Splash.this, Landing.class);
                     startActivity(intent);
                 }
             };

@@ -95,6 +95,8 @@ public class Translate extends ActionBarActivity implements
         }.execute(keyword);
     }
 
+
+
     public void setTranslation(Spannable translations){
         if (translations == null){
             tv_translation.setText("No Translations found");
