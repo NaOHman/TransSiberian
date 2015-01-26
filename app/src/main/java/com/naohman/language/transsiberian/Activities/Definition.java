@@ -53,6 +53,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     private List<Drawable> imgs = new ArrayList<>();
     private int position = -2, minSwipe;
     private ImageSwitcher switcher;
+    private TextView no_images;
     private ProgressBar pb;
     private String keyword;
     float initialX;
@@ -65,9 +66,10 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         setContentView(R.layout.activity_definition);
         Intent intent = getIntent();
         keyword = intent.getStringExtra("keyword");
-        getImages(keyword);
         pb = (ProgressBar) findViewById(R.id.switcher_loading);
         pb.setVisibility(View.VISIBLE);
+        no_images = (TextView) findViewById(R.id.no_images);
+        no_images.setVisibility(View.INVISIBLE);
         tv_keyword = (TextView) findViewById(R.id.definition);
         tv_keyword.setText(keyword);
         tv_keyword.setOnClickListener(this);
@@ -80,6 +82,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
         rIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_right);
         rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
+        getImages(keyword);
     }
 
     @Override
@@ -171,8 +174,8 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         if (networkInfo != null && networkInfo.isConnected()){
             new FetchImage().execute(keyword);
         } else {
-            //Todo show network error where image switcher was
-            Log.e("CONNECTIVITY", "Not Connected to Internet");
+            pb.setVisibility(View.INVISIBLE);
+            no_images.setVisibility(View.VISIBLE);
         }
     }
 

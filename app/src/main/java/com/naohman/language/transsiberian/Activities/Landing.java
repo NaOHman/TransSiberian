@@ -28,7 +28,7 @@ public class Landing extends Activity {
     }
 
     public void study(View view){
-        Intent intent = new Intent(Landing.this, Study.class);
+        Intent intent = new Intent(Landing.this, Authenticate.class);
         startActivity(intent);
     }
 

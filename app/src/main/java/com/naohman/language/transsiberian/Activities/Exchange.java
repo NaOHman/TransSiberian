@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.net.URI;
 
+//TODO warn user if exchange rate is too old
 public class Exchange extends ActionBarActivity implements TextView.OnEditorActionListener {
 
     private final static String currencyUrl = "http://www.freecurrencyconverterapi.com/api/v3/convert?q=USD_RUB";
