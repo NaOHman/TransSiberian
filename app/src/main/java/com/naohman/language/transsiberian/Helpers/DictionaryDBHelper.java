@@ -11,7 +11,7 @@ import java.io.File;
  * SQLiteAssetHelper allows me to ship a prepackaged, zipped db
  * int the assets folder
  */
-public class DBHelper extends SQLiteAssetHelper {
+public class DictionaryDBHelper extends SQLiteAssetHelper {
 
     private static final String DB_NAME = "translation.db";
     public static final String TABLE_RE = "re";
@@ -22,7 +22,7 @@ public class DBHelper extends SQLiteAssetHelper {
      * Note this method may be very expensive if the database
      * does not already exist
      */
-    public DBHelper(Context context) {
+    public DictionaryDBHelper(Context context) {
         super(context, DB_NAME,getDir(context), null, DB_VERSION);
         setForcedUpgrade();
     }

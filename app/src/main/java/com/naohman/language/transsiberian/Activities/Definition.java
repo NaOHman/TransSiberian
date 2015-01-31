@@ -1,6 +1,9 @@
 package com.naohman.language.transsiberian.Activities;
 
+import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -10,6 +13,7 @@ import android.net.Uri;
 import android.os.*;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -17,8 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +33,7 @@ import android.widget.ViewSwitcher;
 
 import com.naohman.language.transsiberian.Singletons.MyTTS;
 import com.naohman.language.transsiberian.R;
+import com.naohman.language.transsiberian.Singletons.Quizlet;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -48,7 +56,7 @@ import org.json.JSONObject;
  * TODO quizlet integration, pairing
  */
 public class Definition extends ActionBarActivity implements View.OnClickListener,
-        ViewSwitcher.ViewFactory, View.OnTouchListener{
+        ViewSwitcher.ViewFactory, View.OnTouchListener, AdapterView.OnItemClickListener {
     public static final String QUERY_URL ="https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=%s&imgsz=medium";
     private List<Drawable> imgs = new ArrayList<>();
     private int position = -2, minSwipe;
@@ -56,6 +64,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     private TextView no_images;
     private ProgressBar pb;
     private String keyword;
+    private ListView lv_definitions;
     float initialX;
     private static Animation lIn, lOut, rIn, rOut;
     private TextView tv_keyword;
@@ -64,25 +73,37 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_definition);
-        Intent intent = getIntent();
-        keyword = intent.getStringExtra("keyword");
         pb = (ProgressBar) findViewById(R.id.switcher_loading);
         pb.setVisibility(View.VISIBLE);
         no_images = (TextView) findViewById(R.id.no_images);
         no_images.setVisibility(View.INVISIBLE);
-        tv_keyword = (TextView) findViewById(R.id.definition);
-        tv_keyword.setText(keyword);
-        tv_keyword.setOnClickListener(this);
         switcher = (ImageSwitcher) findViewById(R.id.image_switcher);
         switcher.setVisibility(View.INVISIBLE);
         switcher.setFactory(this);
         switcher.setOnTouchListener(this);
         minSwipe = switcher.getWidth() / 3;
+        makeAnimations();
+        setMeanings();
+        getImages(keyword);
+    }
+
+    private void setMeanings(){
+        Intent intent = getIntent();
+        tv_keyword = (TextView) findViewById(R.id.definition);
+        lv_definitions = (ListView) findViewById(R.id.definition_lv);
+        keyword = intent.getStringExtra("keyword");
+        List<String> meanings = Arrays.asList(intent.getStringArrayExtra("meanings"));
+        tv_keyword.setOnClickListener(this);
+        tv_keyword.setText(keyword);
+        lv_definitions.setAdapter(new MeaningListAdapter(this, R.layout.translation_tv, meanings));
+        lv_definitions.setOnItemClickListener(this);
+    }
+
+    private void makeAnimations(){
         lIn = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
         lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
         rIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_right);
         rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
-        getImages(keyword);
     }
 
     @Override
@@ -90,7 +111,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         new AsyncTask<String, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(String... params) {
-                return MyTTS.getInstance(null).say(params[0]);
+                return MyTTS.getInstance(getApplicationContext()).say(params[0]);
             }
             @Override
             protected void onPostExecute(Boolean success) {
@@ -120,7 +141,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             float finalX = event.getX();
             if (Math.abs(finalX - initialX) > minSwipe) {
-                changeImage(initialX > finalX);
+                changeImage(initialX < finalX);
             }
         }
         return true;
@@ -179,6 +200,15 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         }
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String word = (String) parent.getItemAtPosition(position);
+        Intent intent = new Intent(this, NewTermOrSet.class);
+        intent.putExtra("term", keyword);
+        intent.putExtra("definition", word);
+        startActivity(intent);
+    }
+
     private class FetchImage extends AsyncTask<String, Drawable, Void> {
         @Override
         protected Void doInBackground(String... params) {
@@ -224,6 +254,23 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
             switcher.setVisibility(View.VISIBLE);
             pb.setVisibility(View.INVISIBLE);
             Log.d("Images Fetched", "Found " +imgs.size() + " images");
+        }
+    }
+
+    private class MeaningListAdapter extends ArrayAdapter<String> {
+        public MeaningListAdapter(Context context, int resource, List<String> meanings) {
+            super(context, resource, meanings);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = getLayoutInflater();
+            View myView = inflater.inflate(R.layout.translation_tv, parent, false);
+            TextView translation = (TextView) myView.findViewById(R.id.tv_translation);
+            String meaning = getItem(position);
+//            Log.d("Meaning", meaning);
+            translation.setText(meaning);
+            return myView;
         }
     }
 }

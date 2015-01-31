@@ -3,8 +3,10 @@ package com.naohman.language.transsiberian.Singletons;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.ArrayAdapter;
 
-import com.naohman.language.transsiberian.Helpers.DBHelper;
+import com.naohman.language.transsiberian.Helpers.DictEntry;
+import com.naohman.language.transsiberian.Helpers.DictionaryDBHelper;
 import com.naohman.language.transsiberian.Helpers.DictHeading;
 
 import java.util.ArrayList;
@@ -18,13 +20,13 @@ import java.util.List;
  */
 public class DictionaryHandler {
     private SQLiteDatabase database;
-    private DBHelper dbHelper;
+    private DictionaryDBHelper dbHelper;
     private static DictionaryHandler instance;
     private static final String[] TRANSLATION_COLS = {"keyword", "definition"};
 
 
     private DictionaryHandler(Context ctx) {
-        dbHelper = new DBHelper(ctx);
+        dbHelper = new DictionaryDBHelper(ctx);
     }
 
     /*
@@ -62,28 +64,30 @@ public class DictionaryHandler {
      * Note that this is an expensive call and could possibly trigger other
      * expensive operations
      */
-    public List<DictHeading> getTranslations(String keyword) {
+    public List<DictEntry> getTranslations(String keyword, Context appCtx) {
         keyword = keyword.toLowerCase();
         Cursor cursor = queryKeyword(keyword);
+        List<DictEntry> entries = new ArrayList<>();
+        List<String> rawEntries = new ArrayList<>();
         if (cursor.getCount() == 0) {
-            List<String> morphs = getDictionaryForms(keyword);
-            List<String> response = new ArrayList<>();
-            if (morphs == null) {
+            List<String> morphs = getDictionaryForms(keyword, appCtx);
+            if (morphs == null)
                 return null;
-            }
             for (String morph : morphs) {
                 cursor = queryKeyword(morph);
-                response.addAll(getColumns(cursor, 1));
+                rawEntries.addAll(getColumns(cursor, 1));
             }
-            return parseDBEntry(response);
         }
-        return parseDBEntry(getColumns(cursor, 1));
+        rawEntries = getColumns(cursor, 1);
+        for (String entry : rawEntries)
+            entries.add(new DictEntry(entry));
+        return entries;
     }
 
     /*
      * returns the dictionary form of a word
      */
-    public static List<String> getDictionaryForms(String keyword) {
+    public static List<String> getDictionaryForms(String keyword, Context appCtx) {
         keyword = keyword.replaceAll("to\\s*", "");
         keyword = keyword.replaceAll("[^A-Za-zА-Яа-я]", "");
         String[] words = keyword.split("\\s");
@@ -91,26 +95,15 @@ public class DictionaryHandler {
         try {
             for (String word : words) {
                 if (isRussian(word)) {
-                    baseforms.addAll(RusMorph.getInstance(null).getNormalForms(word));
+                    baseforms.addAll(RusMorph.getInstance(appCtx).getNormalForms(word));
                 } else if (isEnglish(word)) {
-                    baseforms.addAll(EngMorph.getInstance(null).getNormalForms(word));
+                    baseforms.addAll(EngMorph.getInstance(appCtx).getNormalForms(word));
                 }
             }
             return baseforms;
         } catch (Exception e){
             return null;
         }
-    }
-
-    //Take DB entries, clean them and turn them into DictHeadings
-    private static List<DictHeading> parseDBEntry(List<String> responses) {
-        List<DictHeading> entries = new ArrayList<>();
-        for (String response : responses) {
-            response = response.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
-            response = response.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-            entries.add(new DictHeading(response, 0)); //parse structure
-        }
-        return entries;
     }
 
     /*
@@ -121,11 +114,11 @@ public class DictionaryHandler {
         String[] whereArgs = {keyword};
         Cursor cursor;
         if (isRussian(keyword)) {
-            cursor = database.query(DBHelper.TABLE_RE,
+            cursor = database.query(DictionaryDBHelper.TABLE_RE,
                     TRANSLATION_COLS, "keyword=?", whereArgs,
                     null, null, null);
         } else {
-            cursor = database.query(DBHelper.TABLE_ER,
+            cursor = database.query(DictionaryDBHelper.TABLE_ER,
                     TRANSLATION_COLS, "keyword=? COLLATE NOCASE", whereArgs,
                     null, null, null);
         }

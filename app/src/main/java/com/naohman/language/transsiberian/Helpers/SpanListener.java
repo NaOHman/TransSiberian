@@ -7,6 +7,7 @@ import android.view.View;
  * Interface for responding to clicks on definitions or references
  */
 public interface SpanListener {
-    public abstract void onReferenceClick(View v, String word);
-    public abstract void onDefinitionClick(View v, String word);
+    public abstract void onReferenceClick(View v, DictEntry entry, String word);
+    public abstract void onDefinitionClick(View v, DictEntry entry, String word);
+    public abstract void onKeywordClick(View v, DictEntry entry);
 }

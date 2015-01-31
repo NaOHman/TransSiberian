@@ -14,7 +14,15 @@
         <item>Dollars to Rubles</item>
         <item>Rubles to Dollars</item>
     </array>
+    <array name="term_language">
+        <item>Russian First</item>
+        <item>English First</item>
+    </array>
 
     <string name="title_activity_study">Study</string>
+    <string name="title_activity_set">SetActivity</string>
+    <string name="title_activity_new_set">NewSet</string>
+    <string name="title_activity_new_term">NewTerm</string>
+    <string name="title_activity_new_term_or_set">NewTermOrSet</string>
 
 </resources>

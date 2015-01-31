@@ -3,6 +3,8 @@ package com.naohman.language.transsiberian.Helpers;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.style.LeadingMarginSpan;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,33 +17,30 @@ import java.util.List;
 public class DictHeading {
     private static final int MAX_PREFIX = 4;
     private static final String[] FIRST_PREFIX = {"<b>I</b>", "<b>1\\.</b>","1\\)","а\\)","a\\)"};
-    private List<DictHeading> subHeadings;
-    private String contents;
 
-    public DictHeading(String text, int  prefixLevel){
-        //no possible subheadings
-        if (prefixLevel == MAX_PREFIX){
-            this.contents = text;
-            this.subHeadings = null;
-            return;
-        }
-        this.subHeadings = new ArrayList<>();
-        List<String> rawHeadings = new ArrayList<>();
-
+    public static String parse(String text, int prefixLevel){
+        if (text == "")
+            return "";
+        String parsed;
+        List<String> sections = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
         //Not every level of prefix gets used
-        while (rawHeadings.size() < 2 && prefixLevel < MAX_PREFIX) {
-            rawHeadings = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
+        while (sections.size() < 2 && prefixLevel < MAX_PREFIX) {
             prefixLevel++;
+            sections = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
         }
-        if (rawHeadings.size() > 0)
-            this.contents = rawHeadings.get(0);
+        if (sections.size() > 0 && prefixLevel < MAX_PREFIX)
+            parsed = sections.get(0);
         else
-            this.contents = text;
-        if (rawHeadings.size() > 1){
-            for (int i=1; i<rawHeadings.size(); i++){
-                subHeadings.add(new DictHeading(rawHeadings.get(i), prefixLevel));
+            parsed = text;
+        if (sections.size() > 1){
+            for (int i=1; i<sections.size(); i++){
+                parsed += parse(sections.get(i), prefixLevel+1);
             }
         }
+        if (prefixLevel == 0)
+            return "<section>" + parsed + "</section>";
+        else
+            return "<br><section>" + parsed + "</section>";
     }
 
     /*
@@ -59,24 +58,6 @@ public class DictHeading {
             headings.addAll(breakHeadings(unescaped + chunks[1],
                     nextPrefix(prefixLevel, prefix), prefixLevel));
         return headings;
-    }
-
-    /*
-     * formats the dictionary entries in a way that preserves their structure
-     */
-    public SpannableStringBuilder toSpan(Html.TagHandler h){
-        return toSpan(0, h);
-    }
-
-    private SpannableStringBuilder toSpan(int indent, Html.TagHandler handler){
-        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("\u200B"+contents,null, handler);
-        s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
-        if (subHeadings != null) {
-            for (DictHeading heading : subHeadings) {
-                s.append(heading.toSpan(indent + 40, handler));
-            }
-        }
-        return s;
     }
 
     /*

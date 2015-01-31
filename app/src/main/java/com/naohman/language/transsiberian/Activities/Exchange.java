@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 //TODO warn user if exchange rate is too old
+//TODO alert when no currency has been downloaded
 public class Exchange extends ActionBarActivity implements TextView.OnEditorActionListener {
 
     private final static String currencyUrl = "http://www.freecurrencyconverterapi.com/api/v3/convert?q=USD_RUB";
@@ -75,7 +76,7 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         return super.onOptionsItemSelected(item);
     }
     public void getExchange(){
-        exchange = prefs.getFloat("exchange", 64.1245f);
+        exchange = prefs.getFloat("exchange", 0.0f);
         ConnectivityManager cManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cManager.getActiveNetworkInfo();
@@ -99,7 +100,7 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
 
     public void convert(View v){
         String base = currency_et.getText().toString();
-        if (exchange == 0.0 || base == ""){
+        if (exchange == 0.0 || base.matches("\\s*")){
             currency_tv.setText("");
         } else {
             float baseRate  = Float.parseFloat(base);

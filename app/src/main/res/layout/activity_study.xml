@@ -1,12 +1,46 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.naohman.language.transsiberian.Activities.Study">
-
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dip"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:layout_weight="2">
+        <TextView
+            android:layout_width="match_parent"
+            android:textSize="32sp"
+            android:text="Hello"
+            android:maxLines="2"
+            android:onClick="edit"
+            android:id="@+id/set_title"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_width="match_parent"
+            android:id="@+id/set_description"
+            android:text="Hello"
+            android:onClick="edit"
+            android:paddingLeft="24sp"
+            android:maxLines="2"
+            android:textSize="24sp"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:padding="30sp"
+        android:layout_weight="6">
+        <ViewFlipper
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="250sp"
+            android:clickable="true"
+            android:id="@+id/flashcard"
+            android:animateFirstView="true"></ViewFlipper>
+    </LinearLayout>
+</LinearLayout>

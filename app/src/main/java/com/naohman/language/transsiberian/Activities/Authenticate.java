@@ -1,7 +1,6 @@
 package com.naohman.language.transsiberian.Activities;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -122,7 +121,7 @@ public class Authenticate extends ActionBarActivity implements DialogInterface.O
     }
 
     private void study(){
-        Intent launcher = new Intent(this, Study.class);
+        Intent launcher = new Intent(this, SetListActivity.class);
         startActivity(launcher);
     }
 

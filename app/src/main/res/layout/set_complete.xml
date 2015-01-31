@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+    <TextView
+        android:text="Set name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="#cccccc"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:maxLines="4"
+        android:id="@+id/completed_set_name"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Round: 4/7"
+        android:layout_gravity="center"
+        android:background="#cccccc"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:id="@+id/score"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="0dip"
+            android:onClick="nextRound"
+            android:id="@+id/next_round"
+            android:text="Continue"
+            android:textColor="#ffffff"
+            android:background="#00004b"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+        <Button
+            android:layout_width="0dip"
+            android:onClick="restart"
+            android:background="#4b0000"
+            android:textColor="#ffffff"
+            android:text="Restart"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+</LinearLayout>

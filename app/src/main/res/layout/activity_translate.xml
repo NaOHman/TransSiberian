@@ -11,14 +11,12 @@
         android:layout_height="fill_parent"
         android:id="@+id/sv_translation"
         android:layout_above="@+id/myFooter">
-        <TextView
+        <ListView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="start"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/tv_translation"
+            android:id="@+id/lv_translation"
             android:layout_weight="0"
-            android:linksClickable="true" />
+            />
     </ScrollView>
     <ProgressBar
         style="?android:attr/progressBarStyleLarge"
