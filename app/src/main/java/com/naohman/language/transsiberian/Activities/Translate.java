@@ -5,40 +5,37 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.naohman.language.transsiberian.Helpers.DictEntry;
-import com.naohman.language.transsiberian.Helpers.DictHeading;
 import com.naohman.language.transsiberian.Singletons.DictionaryHandler;
 import com.naohman.language.transsiberian.R;
 import com.naohman.language.transsiberian.Helpers.SpanListener;
+import com.naohman.language.transsiberian.Singletons.SetUpManager;
 
-import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 public class Translate extends ActionBarActivity implements
-        View.OnClickListener, SpanListener {
+        View.OnClickListener, SpanListener, TextView.OnEditorActionListener {
     private EditText et_keyword;
     private Button btn_translate;
     private ListView lv_translation;
-    private ScrollView sv_translation;
     private ProgressBar pb_loading;
     private Stack<TranslationListAdapter> previous = new Stack<>();
     private TranslationListAdapter current = null;
@@ -48,11 +45,16 @@ public class Translate extends ActionBarActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translate);
+        SetUpManager sMgr = SetUpManager.getInstance();
+        sMgr.loadDictionary(getApplicationContext());
+        sMgr.loadRusMorphology(getApplicationContext());
+        sMgr.loadEngMorphology(getApplicationContext());
+        sMgr.loadTTS(getApplicationContext());
         pb_loading = (ProgressBar) findViewById(R.id.translations_loading);
         pb_loading.setVisibility(View.INVISIBLE);
         et_keyword = (EditText) findViewById(R.id.et_keyword);
+        et_keyword.setOnEditorActionListener(this);
         btn_translate = (Button) findViewById(R.id.btn_translate);
-        sv_translation = (ScrollView) findViewById(R.id.sv_translation);
         lv_translation = (ListView) findViewById(R.id.lv_translation);
         btn_translate.setOnClickListener(Translate.this);
     }
@@ -68,7 +70,7 @@ public class Translate extends ActionBarActivity implements
             @Override
             protected void onPreExecute(){
                 pb_loading.setVisibility(View.VISIBLE);
-                lv_translation.setVisibility(View.INVISIBLE);
+                lv_translation.setVisibility(View.GONE);
             }
             @Override
             protected List<DictEntry> doInBackground(String... params) {
@@ -83,7 +85,7 @@ public class Translate extends ActionBarActivity implements
             }
             @Override
             protected void onPostExecute(List<DictEntry> entries){
-                pb_loading.setVisibility(View.INVISIBLE);
+                pb_loading.setVisibility(View.GONE);
                 lv_translation.setVisibility(View.VISIBLE);
                 if (current != null)
                     previous.push(current);
@@ -92,10 +94,8 @@ public class Translate extends ActionBarActivity implements
         }.execute(keyword);
     }
 
-
-
     public void setTranslation(List<DictEntry> translations){
-        if (translations == null && translations.size() > 0){
+        if (translations == null || translations.size() == 0){
             List<DictEntry> entries = new ArrayList();
             entries.add(new DictEntry());
             current = new TranslationListAdapter(this, R.layout.translation_tv, entries);
@@ -103,7 +103,7 @@ public class Translate extends ActionBarActivity implements
             current = new TranslationListAdapter(this, R.layout.translation_tv, translations);
         }
         lv_translation.setAdapter(current);
-        sv_translation.fullScroll(ScrollView.FOCUS_UP);
+        lv_translation.setSelectionAfterHeaderView();
     }
 
     @Override
@@ -134,7 +134,7 @@ public class Translate extends ActionBarActivity implements
         } else {
             current = previous.pop();
             lv_translation.setAdapter(current);
-            sv_translation.fullScroll(ScrollView.FOCUS_UP);
+            lv_translation.setSelectionAfterHeaderView();
         }
     }
 
@@ -164,6 +164,14 @@ public class Translate extends ActionBarActivity implements
     protected void onDestroy() {
         DictionaryHandler.getInstance(null).close();
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_GO){
+            onClick(null);
+        }
+        return false;
     }
 
     private class TranslationListAdapter extends ArrayAdapter<DictEntry> {

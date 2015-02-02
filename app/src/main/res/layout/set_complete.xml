@@ -32,6 +32,7 @@
         android:orientation="horizontal">
         <Button
             android:layout_width="0dip"
+            style="?android:attr/buttonBarButtonStyle"
             android:onClick="nextRound"
             android:id="@+id/next_round"
             android:text="Continue"
@@ -40,6 +41,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content" />
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dip"
             android:onClick="restart"
             android:background="#4b0000"

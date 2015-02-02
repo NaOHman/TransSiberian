@@ -19,17 +19,16 @@ public class SetUpManager {
     private BlockingQueue<Runnable> workQueue;
     private static SetUpManager instance;
 
-    private SetUpManager(Context appCtx){
+    private SetUpManager(){
         threadCount = Runtime.getRuntime().availableProcessors();
         workQueue = new LinkedBlockingQueue<>();
         executor = new ThreadPoolExecutor(threadCount, threadCount,
                 KEEP_ALIVE_TIME, KEEP_ALIVE_UNITS, workQueue);
-        setUpTasks(appCtx);
     }
 
-    public static SetUpManager getInstance(Context appCtx){
+    public static SetUpManager getInstance(){
         if (instance == null)
-            instance = new SetUpManager(appCtx);
+            instance = new SetUpManager();
         return instance;
     }
 
@@ -48,25 +47,25 @@ public class SetUpManager {
     /*
      * start-up tasks
      */
-    private void setUpTasks(final Context appCtx){
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                DictionaryHandler.getInstance(appCtx);
-            }
-        });
+    public void loadRusMorphology(final Context appCtx){
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 RusMorph.getInstance(appCtx);
             }
         });
+    }
+
+    public void loadEngMorphology(final Context appCtx){
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 EngMorph.getInstance(appCtx);
             }
         });
+    }
+
+    public void loadTTS(final Context appCtx){
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -74,4 +73,23 @@ public class SetUpManager {
             }
         });
     }
+
+    public void loadDictionary(final Context appCtx){
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                DictionaryHandler.getInstance(appCtx);
+            }
+        });
+    }
+
+    public void loadQuizlet(final Context appCtx){
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Quizlet.getInstance(appCtx);
+            }
+        });
+    }
+
 }

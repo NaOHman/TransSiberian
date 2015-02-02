@@ -8,15 +8,14 @@
     tools:context="com.naohman.language.transsiberian.Activities.SetListActivity">
     <ListView
         android:layout_width="match_parent"
-        android:layout_weight="5"
-        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_height="0dip"
         android:id="@+id/set_listview">
 
         </ListView>
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="New Set"
         android:onClick="createSet"
         android:textColor="#ffffff"

@@ -1,9 +1,6 @@
 package com.naohman.language.transsiberian.Activities;
 
-import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -33,7 +30,7 @@ import android.widget.ViewSwitcher;
 
 import com.naohman.language.transsiberian.Singletons.MyTTS;
 import com.naohman.language.transsiberian.R;
-import com.naohman.language.transsiberian.Singletons.Quizlet;
+import com.naohman.language.transsiberian.Singletons.SetUpManager;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -73,6 +70,8 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_definition);
+        SetUpManager sMgr = SetUpManager.getInstance();
+        sMgr.loadTTS(getApplicationContext());
         pb = (ProgressBar) findViewById(R.id.switcher_loading);
         pb.setVisibility(View.VISIBLE);
         no_images = (TextView) findViewById(R.id.no_images);

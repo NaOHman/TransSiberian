@@ -1,48 +1,41 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin">
-    <ScrollView
+    <ListView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/sv_translation"
-        android:layout_above="@+id/myFooter">
-        <ListView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/lv_translation"
-            android:layout_weight="0"
-            />
-    </ScrollView>
+        android:layout_height="0dip"
+        android:id="@+id/lv_translation"
+        android:layout_weight="1"
+        />
     <ProgressBar
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical|center_horizontal"
-        android:id="@+id/translations_loading"
-        android:layout_weight="0" />
+        android:id="@+id/translations_loading"/>
     <LinearLayout
         android:id="@+id/myFooter"
-        android:layout_alignParentBottom="true"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent">
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/et_keyword"
+            android:inputType="text"
+            android:singleLine="true"
             android:layout_weight="1"
+            android:imeOptions="actionGo"
             android:hint="Enter word or short phrase" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:id="@+id/btn_translate"
             android:text="Translate" />
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

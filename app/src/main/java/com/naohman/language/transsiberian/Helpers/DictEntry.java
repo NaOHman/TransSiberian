@@ -34,10 +34,12 @@ public class DictEntry implements Html.TagHandler {
     public DictEntry(String s){
         s = s.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
         s = s.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-        s = DictHeading.parse(s, 0);
-        s = s.replaceAll("<br>\\s*<br>","<br>");
-        s = s.replaceAll("<br>\\s*</section><br>", "<br></section>"); //remove excessive line breaks
-        spannable = Html.fromHtml("\u200B"+s,null, this);
+//        s = DictHeading.parse(s, 0);
+//        s = s.replaceAll("<br>\\s*<br>","<br>");
+//        s = s.replaceAll("<br>\\s*</section><br>", "<br></section>"); //remove excessive line breaks
+//        s = s.replaceAll("<br>\\s</section>", "<br></section>"); //remove excessive line breaks
+        DictHeading h = new DictHeading(s, 0);
+        spannable = h.toSpan(0, this);
     }
 
     public DictEntry(){ }
@@ -68,7 +70,7 @@ public class DictEntry implements Html.TagHandler {
             if (marker){
                 int where = getLast(output, LeadingMarginSpan.Standard.class);
                 output.setSpan(new LeadingMarginSpan.Standard(indentLevel, indentLevel),
-                        where,l, 0);
+                        where, l, 0);
                 marker = false;
             }
             if (opening) {

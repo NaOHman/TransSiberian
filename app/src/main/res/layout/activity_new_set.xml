@@ -1,6 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:anadroid="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -23,6 +21,9 @@
         <EditText
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:inputType="text"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
             android:id="@+id/set_name"/>
         <TextView
             android:textSize="@dimen/abc_text_size_headline_material"
@@ -33,6 +34,9 @@
         <EditText
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:inputType="text"
+            android:singleLine="true"
+            android:imeOptions="actionGo"
             android:id="@+id/set_description"/>
         <RadioGroup
             android:layout_width="match_parent"

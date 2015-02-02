@@ -73,11 +73,6 @@
             android:label="@string/title_activity_set" >
         </activity>
         <activity
-            android:name=".Activities.NewTerm"
-            android:label="@string/title_activity_new_term"
-            android:noHistory="true" >
-        </activity>
-        <activity
             android:name=".Activities.NewTermOrSet"
             android:label="@string/title_activity_new_term_or_set" >
         </activity>

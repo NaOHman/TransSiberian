@@ -84,7 +84,7 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
             new ExchangeFetcher().execute();
             SharedPreferences.Editor editor = prefs.edit();
             editor.putFloat("exchange", exchange);
-            editor.commit();
+            editor.apply();
         }
     }
     public void swap(View v){

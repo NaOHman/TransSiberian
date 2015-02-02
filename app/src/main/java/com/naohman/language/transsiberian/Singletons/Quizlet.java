@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.Html;
 
 import com.naohman.language.transsiberian.Helpers.QuizletDBHelper;
 import com.naohman.language.transsiberian.Helpers.QuizletSet;
@@ -16,6 +15,7 @@ import java.util.List;
 
 /**
  * Created by jeffrey on 1/26/15.
+ * A singleton that handles the quizlet business
  */
 public class Quizlet {
     public static String RUSSIAN = "";
@@ -55,7 +55,7 @@ public class Quizlet {
         ContentValues values = new ContentValues();
         values.put(QuizletDBHelper.SET_NAME, name);
         values.put(QuizletDBHelper.SET_DESCRIPTION, description);
-        if (termLang == RUSSIAN){
+        if (termLang.equals(RUSSIAN)){
             values.put(QuizletDBHelper.SET_LANG_TERM, RUSSIAN);
             values.put(QuizletDBHelper.SET_LANG_DEF, ENGLISH);
         } else {
@@ -112,6 +112,14 @@ public class Quizlet {
         db.delete(QuizletDBHelper.TABLE_TERMS,
                 QuizletDBHelper.COLUMN_ID+ "=" + t.get_id(), null);
     }
+
+    public void deleteSet(QuizletSet set) {
+        db.delete(QuizletDBHelper.TABLE_TERMS,
+                QuizletDBHelper.TERM_SET_ID + "=" + set.get_id(), null);
+        db.delete(QuizletDBHelper.TABLE_SETS,
+                QuizletDBHelper.COLUMN_ID + "=" + set.get_id(), null);
+    }
+
 
     private QuizletSet cursorToSet(Cursor cursor){
         long _id = cursor.getLong(0);

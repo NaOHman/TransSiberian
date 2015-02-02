@@ -3,6 +3,7 @@ package com.naohman.language.transsiberian.Singletons;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.naohman.language.transsiberian.Helpers.DictEntry;
@@ -71,8 +72,23 @@ public class DictionaryHandler {
         List<String> rawEntries = new ArrayList<>();
         if (cursor.getCount() == 0) {
             List<String> morphs = getDictionaryForms(keyword, appCtx);
-            if (morphs == null)
-                return null;
+            if (morphs == null || morphs.size() == 0){
+                Log.d("No Morphs", keyword);
+                String[] words = keyword.split("\\s");
+                if (words.length > 1){
+                    Log.d("Multiple words", ""+ words.length);
+                    for (String word : words){
+                        List<DictEntry> entryList = getTranslations(word, appCtx);
+                        Log.d("Looking for", word);
+                        if (entryList != null && entryList.size() > 0)
+                            entries.addAll(entryList);
+                    }
+                    Log.d("Sending", entries.size() + " Entries");
+                    return entries;
+                } else {
+                    return null;
+                }
+            }
             for (String morph : morphs) {
                 cursor = queryKeyword(morph);
                 rawEntries.addAll(getColumns(cursor, 1));
@@ -88,17 +104,14 @@ public class DictionaryHandler {
      * returns the dictionary form of a word
      */
     public static List<String> getDictionaryForms(String keyword, Context appCtx) {
-        keyword = keyword.replaceAll("to\\s*", "");
-        keyword = keyword.replaceAll("[^A-Za-zА-Яа-я]", "");
-        String[] words = keyword.split("\\s");
+        keyword = keyword.replaceAll("to\\s", "");
+        keyword = keyword.replaceAll("[^A-Za-zА-Яа-я ]", "");
         List<String> baseforms = new ArrayList<>();
         try {
-            for (String word : words) {
-                if (isRussian(word)) {
-                    baseforms.addAll(RusMorph.getInstance(appCtx).getNormalForms(word));
-                } else if (isEnglish(word)) {
-                    baseforms.addAll(EngMorph.getInstance(appCtx).getNormalForms(word));
-                }
+            if (isRussian(keyword)) {
+                baseforms.addAll(RusMorph.getInstance(appCtx).getNormalForms(keyword));
+            } else if (isEnglish(keyword)) {
+                baseforms.addAll(EngMorph.getInstance(appCtx).getNormalForms(keyword));
             }
             return baseforms;
         } catch (Exception e){

@@ -5,14 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.AdapterView;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -26,7 +25,7 @@ import com.naohman.language.transsiberian.Singletons.Quizlet;
 
 import java.util.List;
 
-public class SetActivity extends ActionBarActivity {
+public class SetActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
     private QuizletSet mySet;
     private Quizlet quizlet;
     private TextView title_tv, description_tv;
@@ -44,6 +43,7 @@ public class SetActivity extends ActionBarActivity {
         description_tv.setText(mySet.getDescription());
         term_et = (EditText) findViewById(R.id.term_term);
         def_et = (EditText) findViewById(R.id.term_definition);
+        def_et.setOnEditorActionListener(this);
         term_view = (ListView) findViewById(R.id.term_lv);
         quizlet = Quizlet.getInstance(getApplicationContext());
         quizlet.open();
@@ -109,11 +109,16 @@ public class SetActivity extends ActionBarActivity {
         }
     }
 
-    private class TermListAdapter extends ArrayAdapter<Term> {
-        public TermListAdapter(Context context, int resource) {
-            super(context, resource);
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_GO){
+            addTerm(null);
+            return true;
         }
+        return false;
+    }
 
+    private class TermListAdapter extends ArrayAdapter<Term> {
         public TermListAdapter(Context context, int resource, List<Term> terms) {
             super(context, resource, terms);
         }

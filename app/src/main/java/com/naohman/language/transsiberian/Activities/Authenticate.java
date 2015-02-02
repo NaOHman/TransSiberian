@@ -109,7 +109,7 @@ public class Authenticate extends ActionBarActivity implements DialogInterface.O
     public void skip(View v){
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("quizlet_integration", false);
-        editor.commit();
+        editor.apply();
         study();
     }
 
@@ -156,7 +156,7 @@ public class Authenticate extends ActionBarActivity implements DialogInterface.O
             pb_auth.setVisibility(View.INVISIBLE);
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString("quizlet_auth_token", token);
-            editor.commit();
+            editor.apply();
             study();
         }
     }

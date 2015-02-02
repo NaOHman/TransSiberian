@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,8 +17,6 @@ import android.widget.TextView;
 import com.naohman.language.transsiberian.Helpers.QuizletSet;
 import com.naohman.language.transsiberian.R;
 import com.naohman.language.transsiberian.Singletons.Quizlet;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -73,6 +70,11 @@ public class SetListActivity extends ActionBarActivity {
 
     public void remove(View view) {
         QuizletSet mySet = (QuizletSet) view.findViewById(R.id.remove_button).getTag();
+        Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet.deleteSet(mySet);
+        List<QuizletSet> setList = quizlet.getAllSets();
+        SetAdapter adapter = new SetAdapter(this, R.layout.set_list_item, setList);
+        sets.setAdapter(adapter);
     }
 
     private class SetAdapter extends ArrayAdapter<QuizletSet> {

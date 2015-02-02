@@ -13,8 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:onClick="study"
-        android:layout_weight="0">
+        android:onClick="study">
         <TextView
             android:layout_width="match_parent"
             android:text="test"
@@ -46,6 +45,8 @@
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:inputType="text"
+        android:imeOptions="actionNext"
         android:id="@+id/term_term"/>
     <TextView
         android:textSize="20sp"
@@ -56,11 +57,12 @@
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:inputType="text"
+        android:imeOptions="actionGo"
         android:id="@+id/term_definition"/>
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
         android:text="Add Term"
         android:textColor="#ffffff"
         android:background="#00004b"

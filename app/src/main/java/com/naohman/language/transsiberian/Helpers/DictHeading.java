@@ -17,7 +17,35 @@ import java.util.List;
 public class DictHeading {
     private static final int MAX_PREFIX = 4;
     private static final String[] FIRST_PREFIX = {"<b>I</b>", "<b>1\\.</b>","1\\)","а\\)","a\\)"};
+    private String contents;
+    private List<DictHeading> subHeadings;
 
+    public DictHeading(String text, int prefixLevel){
+    //no possible subheadings
+        if (prefixLevel == MAX_PREFIX){
+            this.contents = text;
+            this.subHeadings = null;
+            return;
+        }
+        this.subHeadings = new ArrayList<>();
+        List<String> rawHeadings = new ArrayList<>();
+        //Not every level of prefix gets used
+        while (rawHeadings.size() < 2 && prefixLevel < MAX_PREFIX) {
+            rawHeadings = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
+            prefixLevel++;
+        }
+        if (rawHeadings.size() > 0)
+            this.contents = rawHeadings.get(0);
+        else
+            this.contents = text;
+        if (rawHeadings.size() > 1){
+            for (int i=1; i<rawHeadings.size(); i++){
+                subHeadings.add(new DictHeading(rawHeadings.get(i), prefixLevel));
+            }
+        }
+    }
+
+    /*
     public static String parse(String text, int prefixLevel){
         if (text == "")
             return "";
@@ -37,11 +65,9 @@ public class DictHeading {
                 parsed += parse(sections.get(i), prefixLevel+1);
             }
         }
-        if (prefixLevel == 0)
-            return "<section>" + parsed + "</section>";
-        else
-            return "<br><section>" + parsed + "</section>";
+        return "<br><section>" + parsed + "</section>";
     }
+    */
 
     /*
      * break the text into a list of sections where the first section contains
@@ -58,6 +84,17 @@ public class DictHeading {
             headings.addAll(breakHeadings(unescaped + chunks[1],
                     nextPrefix(prefixLevel, prefix), prefixLevel));
         return headings;
+    }
+
+    public SpannableStringBuilder toSpan(int indent, Html.TagHandler handler){
+        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("\u200B"+contents,null, handler);
+        s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
+        if (subHeadings != null) {
+            for (DictHeading heading : subHeadings) {
+                s.append(heading.toSpan(indent + 30, handler));
+            }
+        }
+        return s;
     }
 
     /*
