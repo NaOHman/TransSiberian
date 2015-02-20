@@ -40,6 +40,11 @@ public class NewTermOrSet extends ActionBarActivity implements AdapterView.OnIte
         Intent intent = getIntent();
         term.setText(intent.getStringExtra("term"));
         def.setText(intent.getStringExtra("definition"));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
         quizlet.open();
         sets = quizlet.getAllSets();

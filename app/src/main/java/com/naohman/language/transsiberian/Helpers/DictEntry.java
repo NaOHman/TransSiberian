@@ -34,10 +34,15 @@ public class DictEntry implements Html.TagHandler {
     public DictEntry(String s){
         s = s.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
         s = s.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-//        s = DictHeading.parse(s, 0);
-//        s = s.replaceAll("<br>\\s*<br>","<br>");
-//        s = s.replaceAll("<br>\\s*</section><br>", "<br></section>"); //remove excessive line breaks
-//        s = s.replaceAll("<br>\\s</section>", "<br></section>"); //remove excessive line breaks
+        /*
+        int maxLogSize = 1000;
+        for(int i = 0; i <= s.length() / maxLogSize; i++) {
+            int start = i * maxLogSize;
+            int end = (i+1) * maxLogSize;
+            end = end > s.length() ? s.length() : end;
+            Log.v("Raw", s.substring(start, end));
+        }
+        */
         DictHeading h = new DictHeading(s, 0);
         spannable = h.toSpan(0, this);
     }

@@ -1,9 +1,11 @@
 package com.naohman.language.transsiberian.Helpers;
 
+import java.io.Serializable;
+
 /**
  * Created by jeffrey on 1/26/15.
  */
-public class Term {
+public class Term implements Serializable {
     private long _id;
     private String term;
     private String definition;

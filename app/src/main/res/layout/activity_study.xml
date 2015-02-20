@@ -4,7 +4,7 @@
     android:orientation="vertical"
     tools:context="com.naohman.language.transsiberian.Activities.Study">
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:orientation="vertical"
         android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -17,6 +17,7 @@
             android:text="Hello"
             android:maxLines="2"
             android:onClick="edit"
+            android:clickable="true"
             android:id="@+id/set_title"
             android:textStyle="bold"
             android:layout_height="wrap_content" />
@@ -25,22 +26,17 @@
             android:id="@+id/set_description"
             android:text="Hello"
             android:onClick="edit"
+            android:clickable="true"
             android:paddingLeft="24sp"
             android:maxLines="2"
             android:textSize="24sp"
             android:layout_height="wrap_content" />
         </LinearLayout>
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:padding="30sp"
+        android:id="@+id/flashcard_holder"
         android:layout_weight="6">
-        <ViewFlipper
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="250sp"
-            android:clickable="true"
-            android:id="@+id/flashcard"
-            android:animateFirstView="true"></ViewFlipper>
-    </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

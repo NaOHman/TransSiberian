@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="flashCard">#cccccc</color>
+    <color name="my_highlight1_bg">#00004b</color>
+    <color name="my_highlight1_fg">#ffffff</color>
 </resources>

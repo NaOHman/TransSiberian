@@ -1,8 +1,10 @@
 package com.naohman.language.transsiberian.Activities;
 
+import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.content.Intent;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,42 +13,42 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
-import android.widget.ViewSwitcher;
 
-import com.naohman.language.transsiberian.Helpers.FlashCardView;
+import com.naohman.language.transsiberian.Helpers.FlashCardPair;
 import com.naohman.language.transsiberian.Helpers.QuizletSet;
 import com.naohman.language.transsiberian.Helpers.Term;
 import com.naohman.language.transsiberian.R;
 import com.naohman.language.transsiberian.Singletons.Quizlet;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class Study extends ActionBarActivity implements View.OnClickListener, View.OnTouchListener {
+public class Study extends ActionBarActivity implements View.OnClickListener, View.OnTouchListener, Animator.AnimatorListener {
     private TextView set_title, set_description;
-    private ViewFlipper flashCard;
-    private AnimatorSet setRightOut, setLeftIn;
+    private FrameLayout holder;
+    private AnimatorSet flipOut, flipIn;
     private float initialX, initialY, minSwipe;
-    private List<FlashCardView> terms;
+    private List<FlashCardPair> terms;
+    private List<FlashCardPair> saved = new ArrayList<>();
+    private List<FlashCardPair> active = new ArrayList<>();
     private int current = 0;
-    private int total = 0;
-    private List<FlashCardView> saved = new ArrayList<>();
     private QuizletSet mySet;
     private static Animation downIn, lOut, rOut;
     private boolean backFirst = false;
 
+    //TODO add prompt with definition
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
-        flashCard = (ViewFlipper) findViewById(R.id.flashcard);
+        holder = (FrameLayout) findViewById(R.id.flashcard_holder);
         mySet = (QuizletSet) getIntent().getSerializableExtra("set");
         set_title = (TextView) findViewById(R.id.set_title);
         set_title.setText(mySet.getTitle());
@@ -54,28 +56,26 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
         set_description.setText(mySet.getDescription());
         Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
         quizlet.open();
-        terms = makeViews(quizlet.getSetTerms(mySet.get_id()));
-        current = terms.size();
-        total = current;
-        minSwipe = flashCard.getWidth() / 3;
-        lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
-        rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
-        downIn = AnimationUtils.loadAnimation(this, R.anim.slide_down_in);
-        setRightOut = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_out);
-        setLeftIn = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_in);
-        flashCard.setInAnimation(downIn);
+        terms = makeFlashCards(quizlet.getSetTerms(mySet.get_id()));
+        minSwipe = 80;
+//        lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+//        rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
+//        downIn = AnimationUtils.loadAnimation(this, R.anim.slide_down_in);
+//        flipOut = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_out);
+//        flipIn = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_in);
+//        flipIn.addListener(this);
         setFlashCards(terms);
     }
 
-    private List<FlashCardView> makeViews(List<Term> terms){
-        List<FlashCardView> views = new ArrayList<>();
+    private List<FlashCardPair> makeFlashCards(List<Term> terms){
+        List<FlashCardPair> cards = new ArrayList<>();
         for (Term term : terms) {
-            FlashCardView v = new FlashCardView(this, null, term.getTerm(), term.getDefinition(), backFirst);
-            v.setOnClickListener(this);
-            v.setOnTouchListener(this);
-            views.add(v);
+            FlashCardPair card = new FlashCardPair(this, term.getTerm(), term.getDefinition(), backFirst);
+            card.setOnClickListener(this);
+            card.setOnTouchListener(this);
+            cards.add(card);
         }
-        return views;
+        return cards;
     }
 
     @Override
@@ -94,6 +94,8 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            backFirst = !backFirst;
+            setFlashCards(terms);
             return true;
         }
 
@@ -102,21 +104,25 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
 
     @Override
     public void onClick(View v) {
-        FlashCardView card = (FlashCardView) v;
-        setRightOut.setTarget(card.getVisible());
-        setLeftIn.setTarget(card.getHidden());
-        setLeftIn.start();
-        setRightOut.start();
-        card.swap();
-        Log.d("Clicked", "View switcher");
+        active.get(current).swap();
+        holder.removeAllViews();
+        holder.addView(active.get(current).getVisible());
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        active.get(current).swap();
+        holder.removeView(active.get(current).getVisible());
+        holder.addView(active.get(current).getVisible());
     }
 
     public void reset(){
+        holder.removeAllViews();
         LayoutInflater inflater = getLayoutInflater();
-        View score = inflater.inflate(R.layout.set_complete, flashCard);
+        View score = inflater.inflate(R.layout.set_complete, holder);
         ((TextView) score.findViewById(R.id.completed_set_name)).setText(mySet.getTitle());
         ((TextView) score.findViewById(R.id.score)).
-                setText("Round: " + (total - saved.size()) + "/" + total +
+                setText("Round: " + (active.size() - saved.size()) + "/" + active.size() +
                         "\nTotal: " + (terms.size() - saved.size()) + "/" + terms.size());
         if (saved.size() == 0) {
             score.findViewById(R.id.next_round).setVisibility(View.GONE);
@@ -131,43 +137,47 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
         setFlashCards(terms);
     }
 
-    public void setFlashCards(List<FlashCardView> views){
+    public void setFlashCards(List<FlashCardPair> views){
         Collections.shuffle(views);
-        current = views.size();
-        flashCard.removeAllViews();
-        for (FlashCardView v : views){
-            v.setVisible(backFirst);
-            flashCard.addView(v);
+        current = 0;
+        active = new ArrayList<>();
+        holder.removeAllViews();
+        for (FlashCardPair card : views){
+            card.setVisible(backFirst);
+            active.add(card);
         }
-        flashCard.showNext();
+        holder.addView(active.get(current).getView(backFirst));
         saved = new ArrayList<>();
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            initialX = event.getX();
-            initialY = event.getY();
-        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-            float dx = initialX - event.getX();
-            float dy = initialY - event.getX();
+            initialX = event.getRawX();
+            initialY = event.getRawY();
+        } else if (event.getAction() == MotionEvent.ACTION_MOVE){
+            v.setLeft((int) (event.getRawX() - initialX));
+
+        }else if (event.getAction() == MotionEvent.ACTION_UP) {
+            float dx = initialX - event.getRawX();
+            float dy = initialY - event.getRawX();
             if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipe) {
-                current--;
-                if (current == 0){
+                if (current == active.size()-1){
                     if (dx < 0)
-                        saved.add((FlashCardView) v);
-                    flashCard.removeView(v);
+                        saved.add(active.get(current));
+                    holder.removeView(v);
                     reset();
                 } else {
                     if (dx > 0) {
-                        flashCard.setOutAnimation(rOut);
-                        flashCard.showNext();
+                        //Animations here
+
                     } else {
-                        flashCard.setOutAnimation(lOut);
-                        flashCard.showPrevious();
-                        saved.add((FlashCardView) v);
+                        //Animations
+                        saved.add(active.get(current));
                     }
-                    flashCard.removeView(v);
+                    holder.removeAllViews();
+                    current++;
+                    holder.addView(active.get(current).getView(backFirst));
                 }
                 return true;
             }
@@ -175,9 +185,20 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
         return false;
     }
 
+
     public void edit(View v){
         Intent intent = new Intent(this, SetActivity.class);
         intent.putExtra("set", mySet);
         startActivity(intent);
     }
+
+    @Override
+    public void onAnimationStart(Animator animation) {}
+
+
+    @Override
+    public void onAnimationCancel(Animator animation) {}
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {}
 }

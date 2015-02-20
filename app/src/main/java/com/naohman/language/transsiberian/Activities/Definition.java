@@ -50,7 +50,6 @@ import org.json.JSONObject;
  * Created by Jeffrey Lyman
  * An activity for displaying a chosen keyword-definition pair
  * Shows the results of google image searches for the keyword
- * TODO quizlet integration, pairing
  */
 public class Definition extends ActionBarActivity implements View.OnClickListener,
         ViewSwitcher.ViewFactory, View.OnTouchListener, AdapterView.OnItemClickListener {
@@ -66,6 +65,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     private static Animation lIn, lOut, rIn, rOut;
     private TextView tv_keyword;
 
+    //TODO add look up function
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

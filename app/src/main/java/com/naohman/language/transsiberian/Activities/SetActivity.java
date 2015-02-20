@@ -2,18 +2,19 @@ package com.naohman.language.transsiberian.Activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,12 +26,13 @@ import com.naohman.language.transsiberian.Singletons.Quizlet;
 
 import java.util.List;
 
-public class SetActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
+public class SetActivity extends FragmentActivity {
     private QuizletSet mySet;
     private Quizlet quizlet;
     private TextView title_tv, description_tv;
     private ListView term_view;
-    private EditText term_et, def_et;
+    private FragmentManager fm = getSupportFragmentManager();
+    //Todo add edit term
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +43,6 @@ public class SetActivity extends ActionBarActivity implements TextView.OnEditorA
         title_tv.setText(mySet.getTitle());
         description_tv = (TextView) findViewById(R.id.set_description);
         description_tv.setText(mySet.getDescription());
-        term_et = (EditText) findViewById(R.id.term_term);
-        def_et = (EditText) findViewById(R.id.term_definition);
-        def_et.setOnEditorActionListener(this);
         term_view = (ListView) findViewById(R.id.term_lv);
         quizlet = Quizlet.getInstance(getApplicationContext());
         quizlet.open();
@@ -87,35 +86,52 @@ public class SetActivity extends ActionBarActivity implements TextView.OnEditorA
         startActivity(intent);
     }
 
-    public void addTerm(View v){
-        String term = term_et.getText().toString();
-        String definition = def_et.getText().toString();
+    public boolean addTerm(String term, String definition, Term oldTerm){
         if (term.matches("\\s*")) {
             new AlertDialog.Builder(this)
                 .setTitle("Invalid input")
                 .setMessage("Must specify term")
+                .setNegativeButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
                 .show();
         }else if (definition.matches("\\s*")){
             new AlertDialog.Builder(this)
                 .setTitle("Invalid input")
+                .setNegativeButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
                 .setMessage("Must specify definition")
                 .show();
         } else {
+            if (oldTerm != null)
+                quizlet.removeTerm(oldTerm);
             quizlet.createTerm(mySet.get_id(), term, definition);
             List<Term> terms = quizlet.getSetTerms(mySet.get_id());
             term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
-            term_et.setText("");
-            def_et.setText("");
-        }
-    }
-
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_GO){
-            addTerm(null);
             return true;
         }
         return false;
+    }
+
+    public void newTerm(View v) {
+        DialogFragment f = new AddTermFragment();
+        f.show(fm, "New Term ");
+    }
+
+    public void itemSelected(View view) {
+        Term t = (Term) view.getTag();
+        DialogFragment f = new AddTermFragment();
+        f.show(fm, "New Term ");
+        Bundle args = new Bundle();
+        args.putSerializable(AddTermFragment.TERM_TAG, t);
+        f.setArguments(args);
     }
 
     private class TermListAdapter extends ArrayAdapter<Term> {
@@ -130,8 +146,9 @@ public class SetActivity extends ActionBarActivity implements TextView.OnEditorA
             TextView title = (TextView) myView.findViewById(R.id.title_tv);
             TextView description = (TextView) myView.findViewById(R.id.description_tv);
             ImageButton btn = (ImageButton) myView.findViewById(R.id.remove_button);
-            btn.setTag(getItem(position));
             Term myTerm = getItem(position);
+            myView.findViewById(R.id.text_section).setTag(myTerm);
+            btn.setTag(myTerm);
             title.setText(myTerm.getTerm());
             description.setText(myTerm.getDefinition());
             return myView;

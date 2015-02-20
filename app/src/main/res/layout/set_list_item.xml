@@ -6,6 +6,7 @@
     <LinearLayout
         android:layout_width="0dip"
         android:layout_weight="8"
+        android:id="@+id/text_section"
         android:orientation="vertical"
         android:onClick="itemSelected"
         android:layout_height="wrap_content">

@@ -36,7 +36,6 @@
             android:layout_height="wrap_content" />
         <EditText
             android:layout_width="match_parent"
-            android:textSize="@dimen/abc_text_size_headline_material"
             android:id="@+id/enter_definition"
             android:inputType="text"
             android:singleLine="true"

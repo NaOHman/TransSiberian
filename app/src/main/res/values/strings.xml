@@ -24,5 +24,6 @@
     <string name="title_activity_new_set">NewSet</string>
     <string name="title_activity_new_term">NewTerm</string>
     <string name="title_activity_new_term_or_set">NewTermOrSet</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
