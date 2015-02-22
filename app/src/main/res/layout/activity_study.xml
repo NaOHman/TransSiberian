@@ -32,11 +32,35 @@
             android:textSize="24sp"
             android:layout_height="wrap_content" />
         </LinearLayout>
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:padding="30sp"
-        android:id="@+id/flashcard_holder"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
         android:layout_weight="6">
-    </FrameLayout>
+        <RelativeLayout
+            android:layout_gravity="center"
+            android:id="@+id/flashcard_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            </RelativeLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:padding="15dp"
+            android:alpha="0"
+            android:id="@+id/correct_img"
+            android:src="@drawable/ic_action_accept"
+            />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:id="@+id/incorrect_img"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:padding="15dp"
+            android:alpha="0"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_action_remove"
+            />
+    </RelativeLayout>
 </LinearLayout>

@@ -1,6 +1,5 @@
 package com.naohman.language.transsiberian.Activities;
 
-import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,8 +12,6 @@ import com.naohman.language.transsiberian.Helpers.Term;
 import com.naohman.language.transsiberian.R;
 
 public class AddTermFragment extends DialogFragment {
-    public static String TITLE_TAG = "title";
-    public static String DEF_TAG = "def";
     public static String TERM_TAG = "term";
     private Term term = null;
     private EditText termET, defET;
