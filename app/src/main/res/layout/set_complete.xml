@@ -1,54 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="30dp"
-    android:layout_height="match_parent">
+    android:padding="@dimen/flashcard_margin">
     <TextView
-        android:text="Set name"
+        android:id="@+id/completed_set_name"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#cccccc"
         android:layout_gravity="center"
         android:gravity="center"
-        android:textSize="36sp"
+        android:background="@color/flashCard"
+        android:textSize="@dimen/heading"
         android:textStyle="bold"
         android:maxLines="4"
-        android:id="@+id/completed_set_name"/>
+        />
     <TextView
+        android:id="@+id/score"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="Round: 4/7"
         android:layout_gravity="center"
-        android:background="#cccccc"
         android:gravity="center"
-        android:textSize="24sp"
-        android:id="@+id/score"/>
+        android:background="@color/flashCard"
+        android:textSize="@dimen/subheading"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="horizontal">
         <Button
-            android:layout_width="0dip"
             style="?android:attr/buttonBarButtonStyle"
-            android:onClick="nextRound"
             android:id="@+id/next_round"
-            android:text="Continue"
-            android:textColor="#ffffff"
-            android:background="#00004b"
+            android:layout_height="wrap_content"
+            android:layout_width="0dip"
             android:layout_weight="1"
-            android:layout_height="wrap_content" />
+            android:text="@string/continue_string"
+            android:textColor="@color/hi_fg_1"
+            android:background="@color/hi_bg_1"
+            android:onClick="nextRound"
+            />
         <Button
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dip"
-            android:onClick="restart"
-            android:background="#4b0000"
-            android:textColor="#ffffff"
-            android:text="Restart"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_height="wrap_content" />
+            android:textColor="@color/hi_fg_2"
+            android:background="@color/hi_bg_2"
+            android:text="@string/restart"
+            android:onClick="restart"
+            />
         </LinearLayout>
 </LinearLayout>

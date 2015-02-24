@@ -1,16 +1,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context="com.naohman.language.transsiberian.Activities.Authenticate">
+    tools:context="com.naohman.transsiberian.Study.Authenticate">
 
     <ImageView
-        android:layout_weight="3"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
+        android:layout_weight="3"
         android:src="@drawable/quizlet_large"
         android:scaleType="fitCenter"/>
     <LinearLayout
@@ -19,10 +21,10 @@
         android:layout_weight="2">
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"
+            android:id="@+id/pb_auth"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:id="@+id/pb_auth"
             />
     </LinearLayout>
     <LinearLayout
@@ -35,22 +37,20 @@
             android:layout_width="0dip"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#00004b"
-            android:textColor="#ffffff"
+            android:textColor="@color/hi_fg_1"
+            android:background="@color/hi_bg_1"
+            android:text="@string/connect"
             android:onClick="getAuthCode"
-            android:text="Connect"
             />
         <Button
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dip"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#4b0000"
-            android:textColor="#ffffff"
+            android:textColor="@color/hi_fg_2"
+            android:background="@color/hi_bg_2"
+            android:text="@string/skip"
             android:onClick="skip"
-            android:text="Skip"
              />
     </LinearLayout>
-
-
 </LinearLayout>

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
-    android:textSize="24dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/flashcard_back"
-    android:textStyle="bold"
-    android:background="@color/flashCard"
-    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="30dp"
+    android:layout_margin="@dimen/flashcard_margin"
     android:layout_centerInParent="true"
-    xmlns:android="http://schemas.android.com/apk/res/android" />
+    android:gravity="center"
+    android:textSize="@dimen/subheading"
+    android:textStyle="bold"
+    android:background="@color/flashCard"
+    />

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="flashCard">#cccccc</color>
-    <color name="my_highlight1_bg">#00004b</color>
-    <color name="my_highlight1_fg">#ffffff</color>
+    <color name="hi_bg_1">#00004b</color>
+    <color name="hi_fg_1">#ffffff</color>
+    <color name="hi_bg_2">#4b0000</color>
+    <color name="hi_fg_2">#ffffff</color>
+    <color name="hi_bg_3">#ffffff</color>
+    <color name="hi_fg_3">#000000</color>
 </resources>

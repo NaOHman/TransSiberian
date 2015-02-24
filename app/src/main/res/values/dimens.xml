@@ -2,4 +2,15 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="subheading">24dp</dimen>
+    <dimen name="heading">36dp</dimen>
+
+    <dimen name="title">45dp</dimen>
+    <dimen name="clickable_height">45dp</dimen>
+    <dimen name="large_dialog">300dp</dimen>
+    <dimen name="flashcard_margin">30dp</dimen>
+
+    <dimen name="list_heading">20dp</dimen>
+    <dimen name="list_subheading">16dp</dimen>
 </resources>

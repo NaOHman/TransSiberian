@@ -3,34 +3,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.naohman.language.transsiberian.Activities.Landing">
+    tools:context="com.naohman.transsiberian.SetUp.Landing">
     <Button
+        android:id="@+id/translate"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:text="Translate"
-        android:background="#ffffff"
-        android:textSize="@dimen/abc_text_size_display_1_material"
+        android:textColor="@color/hi_fg_3"
+        android:background="@color/hi_bg_3"
+        android:textSize="@dimen/heading"
+        android:text="@string/translate"
         android:onClick="translate"
-        android:id="@+id/translate"/>
+        />
     <Button
+        android:id="@+id/study"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:text="Study"
-        android:textColor="#ffffff"
-        android:background="#00004b"
-        android:textSize="@dimen/abc_text_size_display_1_material"
+        android:textColor="@color/hi_fg_1"
+        android:background="@color/hi_bg_1"
+        android:textSize="@dimen/heading"
+        android:text="@string/study"
         android:onClick="study"
-        android:id="@+id/study"/>
+        />
     <Button
+        android:id="@+id/exchange"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:background="#4b0000"
-        android:textSize="@dimen/abc_text_size_display_1_material"
-        android:textColor="#ffffff"
-        android:text="Exchange"
+        android:background="@color/hi_bg_2"
+        android:textColor="@color/hi_fg_2"
+        android:textSize="@dimen/heading"
+        android:text="@string/exchange"
         android:onClick="exchange"
-        android:id="@+id/exchange"/>
+        />
 </LinearLayout>

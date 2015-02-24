@@ -2,18 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.naohman.language.transsiberian"
     android:installLocation="preferExternal" >
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".Activities.Splash"
+            android:name="com.naohman.transsiberian.SetUp.Splash"
             android:label="@string/app_name"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" >
@@ -24,24 +22,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.Definition"
+            android:name="com.naohman.transsiberian.Translation.Activity.Definition"
             android:label="@string/title_activity_definition" >
         </activity>
         <activity
-            android:name=".Activities.Translate"
+            android:name="com.naohman.transsiberian.Translation.Activity.Translate"
             android:label="@string/title_activity_translate" >
         </activity>
         <activity
-            android:name=".Activities.Landing"
+            android:name="com.naohman.transsiberian.SetUp.Landing"
             android:label="@string/title_activity_landing" >
         </activity>
         <activity
-            android:name=".Activities.Exchange"
+            android:name="com.naohman.transsiberian.Exchange.Exchange"
             android:label="@string/title_activity_exchange"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name=".Activities.Authenticate"
+            android:name="com.naohman.transsiberian.Study.Authenticate"
             android:label="@string/title_activity_study"
             android:noHistory="true" >
             <intent-filter>
@@ -56,24 +54,29 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.Study"
-            android:label="@string/title_activity_study" >
+            android:name="com.naohman.transsiberian.Study.Study"
+            android:label="@string/title_activity_study"
+            android:parentActivityName="com.naohman.transsiberian.Study.SetListActivity" >
+            <!-- Parent activity meta-data to support API level 7+ -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.naohman.transsiberian.Study.SetListActivity" />
         </activity>
         <activity
-            android:name=".Activities.SetListActivity"
+            android:name="com.naohman.transsiberian.Study.SetListActivity"
             android:label="@string/title_activity_set" >
         </activity>
         <activity
-            android:name=".Activities.NewSet"
+            android:name="com.naohman.transsiberian.Study.NewSet"
             android:label="@string/title_activity_new_set"
             android:noHistory="true" >
         </activity>
         <activity
-            android:name=".Activities.SetActivity"
+            android:name="com.naohman.transsiberian.Study.SetActivity"
             android:label="@string/title_activity_set" >
         </activity>
         <activity
-            android:name=".Activities.NewTermOrSet"
+            android:name="com.naohman.transsiberian.Translation.Activity.NewTermOrSet"
             android:label="@string/title_activity_new_term_or_set" >
         </activity>
     </application>

@@ -1,39 +1,41 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:minWidth="300dp"
-    tools:context="com.naohman.language.transsiberian.Activities.AddTermFragment">
+    android:minWidth="@dimen/large_dialog"
+    tools:context="com.naohman.transsiberian.Study.AddTermFragment">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:text="New Term"
+        android:textSize="@dimen/subheading"
+        android:text="@string/new_term"
         />
     <EditText
+        android:id="@+id/term_term"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
         android:imeOptions="actionNext"
-        android:id="@+id/term_term"/>
+        />
     <TextView
-        android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Defintion"
+        android:textSize="@dimen/subheading"
+        android:text="@string/definition"
         />
     <EditText
+        android:id="@+id/term_definition"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:imeOptions="actionGo"
-        android:id="@+id/term_definition"/>
+        android:imeOptions="actionGo"/>
     <Button
         android:id="@+id/new_term"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Add Term"
-        android:textColor="@color/my_highlight1_fg"
-        android:background="@color/my_highlight1_bg"
+        android:textColor="@color/hi_fg_1"
+        android:background="@color/hi_bg_1"
+        android:text="@string/add_term"
         />
 </LinearLayout>

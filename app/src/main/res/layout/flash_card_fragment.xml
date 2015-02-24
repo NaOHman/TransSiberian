@@ -3,28 +3,28 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     <RelativeLayout
-        android:layout_gravity="center"
         android:id="@+id/flashcard_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
         </RelativeLayout>
     <ImageView
+        android:id="@+id/correct_img"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:padding="15dp"
+        android:padding="@dimen/activity_horizontal_margin"
         android:alpha="0"
-        android:id="@+id/correct_img"
         android:src="@drawable/ic_action_accept"
         />
     <ImageView
-        android:layout_width="wrap_content"
         android:id="@+id/incorrect_img"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:padding="15dp"
-        android:alpha="0"
         android:layout_alignParentRight="true"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:alpha="0"
         android:src="@drawable/ic_action_remove"
         />
 </RelativeLayout>

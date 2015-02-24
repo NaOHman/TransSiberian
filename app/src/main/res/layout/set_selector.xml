@@ -4,21 +4,19 @@
     android:orientation="vertical"
     android:layout_height="wrap_content">
     <TextView
+        android:id="@+id/title_tv"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Test"
         android:maxLines="2"
-        android:textSize="20sp"
+        android:textSize="@dimen/list_heading"
         android:textStyle="bold"
-        android:id="@+id/title_tv"
         />
     <TextView
+        android:id="@+id/description_tv"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:maxLines="2"
-        android:text="Test"
-        android:textSize="16sp"
-        android:paddingLeft="16sp"
-        android:id="@+id/description_tv"
+        android:textSize="@dimen/list_subheading"
+        android:paddingLeft="@dimen/list_subheading"
         />
 </LinearLayout>
