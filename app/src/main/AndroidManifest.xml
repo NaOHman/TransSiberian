@@ -36,7 +36,13 @@
         <activity
             android:name="com.naohman.transsiberian.Exchange.Exchange"
             android:label="@string/title_activity_exchange"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="adjustResize"
+           android:parentActivityName="com.naohman.transsiberian.SetUp.Landing" >
+            <!-- Parent activity meta-data to support API level 7+ -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.naohman.transsiberian.SetUp.Landing" />
+            >
         </activity>
         <activity
             android:name="com.naohman.transsiberian.Study.Authenticate"

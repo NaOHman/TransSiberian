@@ -2,6 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.naohman.transsiberian.Exchange.Exchange">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/currency"
+        android:title="Change Currency"
+        android:icon="@drawable/dollar"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="1"
+        />
 </menu>

@@ -15,7 +15,10 @@
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            android:clickable="true"
+            android:onClick="swap"
+            >
             <TextView
                 android:id="@+id/input_label"
                 android:layout_width="0dip"
@@ -23,13 +26,14 @@
                 android:layout_weight="45"
                 android:gravity="center"
                 android:textSize="@dimen/heading"
-                android:clickable="true"
                 android:text="@string/dollar"
-                android:onClick="swap"
                 />
-            <Space
+            <ImageView
+                android:id="@+id/swap"
+                android:src="@drawable/swap"
                 android:layout_width="0dip"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="10"
                 />
             <TextView
@@ -39,9 +43,7 @@
                 android:layout_weight="45"
                 android:gravity="center"
                 android:textSize="@dimen/heading"
-                android:clickable="true"
                 android:text="@string/ruble"
-                android:onClick="swap"
                 />
         </LinearLayout>
         <LinearLayout
