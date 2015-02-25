@@ -20,7 +20,9 @@
     </array>
 
     <string name="title_activity_study">Study</string>
-    <string name="title_activity_set">SetActivity</string>
+    <string name="title_activity_set">Set</string>
+    <string name="title_activity_set_list">Sets</string>
+    <string name="title_activity_authenticate">Quizlet Authentication</string>
     <string name="title_activity_new_set">NewSet</string>
     <string name="title_activity_new_term">NewTerm</string>
     <string name="title_activity_new_term_or_set">NewTermOrSet</string>
@@ -28,25 +30,35 @@
 
     <string name="add_term">Add Term</string>
     <string name="add_to_set">Add Term to Set</string>
+    <string name="cancel">Cancel</string>
     <string name="connect">Connect</string>
     <string name="continue_string">Continue</string>
     <string name="convert">Convert</string>
     <string name="create">Create</string>
     <string name="definition">Definition</string>
     <string name="description">Description</string>
+    <string name="delete_set">Delete Set</string>
+    <string name="delete_set_prompt">Are you sure you want to delete the set</string>
     <string name="dollar">Dollars</string>
+    <string name="done">Done</string>
+    <string name="edit_term">Edit Term</string>
     <string name="english_terms">English Terms</string>
     <string name="exchange">Exchange</string>
     <string name="new_set">New Set</string>
     <string name="new_term">New Term</string>
+    <string name="no">No</string>
+    <string name="no_terms_warning">You can\'t study a set with no terms</string>
     <string name="restart">restart</string>
     <string name="ruble">Rubles</string>
     <string name="russian_terms">Russian Terms</string>
+    <string name="save">Save</string>
+    <string name="save_and_exit">Save and Exit</string>
     <string name="set_name">Set Name</string>
     <string name="skip">Skip</string>
     <string name="study">Study</string>
     <string name="term">Term</string>
     <string name="translate">Translate</string>
     <string name="translation_hint">Enter a word or short phrase</string>
+    <string name="yes">Yes</string>
 
 </resources>

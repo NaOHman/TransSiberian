@@ -19,6 +19,9 @@ import android.widget.TextView;
 import com.naohman.transsiberian.Quizlet.QuizletSet;
 import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.Quizlet.Quizlet;
+import com.naohman.transsiberian.Quizlet.Term;
+
+import java.util.List;
 
 public class Study extends ActionBarActivity implements View.OnClickListener, View.OnTouchListener {
     private TextView set_title, set_description;
@@ -41,20 +44,40 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
         incorrect = (ImageView) findViewById(R.id.incorrect_img);
         correct = (ImageView) findViewById(R.id.correct_img);
         mySet = (QuizletSet) getIntent().getSerializableExtra("set");
+        if (mySet == null)
+            bail();
         set_title = (TextView) findViewById(R.id.set_title);
         set_title.setText(mySet.getTitle());
         set_description = (TextView) findViewById(R.id.set_description);
         set_description.setText(mySet.getDescription());
-        Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
-        quizlet.open();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mgr = new FlashCardManager(quizlet.getSetTerms(mySet.get_id()), frontFirst);
-        holder.addView(mgr.getView(this, holder, getLayoutInflater()));
         lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
         rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
         downIn = AnimationUtils.loadAnimation(this, R.anim.slide_down_in);
         flipOut = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_out);
         flipIn = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_in);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if (mySet == null)
+            bail();
+        Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet.open();
+        List<Term> terms = quizlet.getSetTerms(mySet.get_id());
+        if (terms.isEmpty())
+            bail();
+        mgr = new FlashCardManager(quizlet.getSetTerms(mySet.get_id()), frontFirst);
+        holder.addView(mgr.getView(this, holder, getLayoutInflater()));
+    }
+
+    /**
+     * something is wrong with the set, take the user to the set list page
+     */
+    public void bail(){
+        Intent intent = new Intent(this, SetListActivity.class);
+        startActivity(intent);
     }
 
     @Override

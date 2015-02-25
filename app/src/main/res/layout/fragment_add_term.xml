@@ -16,8 +16,9 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:imeOptions="actionNext"
-        />
+        android:imeOptions="actionNext">
+        <requestFocus/>
+        </EditText>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,12 +31,4 @@
         android:layout_height="wrap_content"
         android:inputType="text"
         android:imeOptions="actionGo"/>
-    <Button
-        android:id="@+id/new_term"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/hi_fg_1"
-        android:background="@color/hi_bg_1"
-        android:text="@string/add_term"
-        />
 </LinearLayout>

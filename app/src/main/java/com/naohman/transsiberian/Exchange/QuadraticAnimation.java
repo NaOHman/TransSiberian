@@ -1,4 +1,4 @@
-package com.naohman.transsiberian.Study;
+package com.naohman.transsiberian.Exchange;
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
@@ -8,16 +8,26 @@ import android.view.animation.Transformation;
 
 /**
  * Created by jeffrey on 2/24/15.
- * This creates an animation that follows a path
+ * This creates an animation that follows a quadratic path
  */
 public class QuadraticAnimation extends Animation {
     private PathMeasure measure;
     private float[] pos = new float[2];
+
+    /**
+     * create an empty Quadratic animation
+     */
     public QuadraticAnimation() {}
 
-    public void setPath(float dx, float dy, boolean swapped) {
+    /**
+     * Change the Animation's path
+     * @param dx the horizontal distance of the animation
+     * @param dy the vertical distance of the animation
+     * @param rightToLeft whether to go left to right or right to left
+     */
+    public void setPath(float dx, float dy, boolean rightToLeft) {
         Path path = new Path();
-        if (swapped) {
+        if (rightToLeft) {
             path.moveTo(dx, 0);
             path.quadTo(dx / 2, -dy, 0, 0);
         } else {

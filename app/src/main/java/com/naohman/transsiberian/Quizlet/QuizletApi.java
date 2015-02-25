@@ -9,9 +9,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import java.util.List;
 
 /**
- * Created by jeffrey on 1/26/15.
+ * A Singleton class for interacting with Quizlet's api
  */
 public class QuizletApi {
+    //TODO basically everything
     private HttpClient client;
     private String access_token;
     private ConnectivityManager connMgr;
@@ -29,53 +30,56 @@ public class QuizletApi {
         return instance;
     }
 
-    /*
+    /**
      * Makes sure that the user is a part of the TransSiberian class
      */
     public void makeClass(){
 
     }
 
-    /*
-     * gets a set from quizlet
+    /**
+     * gets the given set from quizlet
+     * returns null if it cannot find the set
      */
-    public List<Term> getSet(int setId){
+    public QuizletSet getSet(int setId){
         return null;
     }
 
     /**
      * deletes a set on quizlet
      * @param setId the id number of the set
+     * @return whether this action was successful
      */
-    public void deleteSet(int setId){
-
+    public boolean deleteSet(int setId){
+        return false;
     }
 
     /**
      * creates a new set on quizlet
-     * @param setName name of the set
-     * @param description a description of the set
+     * @param set the set to be created
      */
-    public void createSet(String setName, String description){
-
+    public boolean createSet(QuizletSet set){
+        return false;
     }
 
     /**
      * Adds a term to the specified set
      * @param term term being added
      * @param setId the id number of the set
+     * @return whether the term was successfully added
      */
-    public void addTerm(Term term, int setId){
-
+    public boolean addTerm(Term term, int setId){
+        return false;
     }
 
     /**
      * Removes a term from the set it is a part of
      * @param term the term to delete
      * @param setID the set the term belongs to
+     * @return whether the term was successfully deleted
      */
-    public void deleteTerm(Term term, int setID){
-
+    public boolean deleteTerm(Term term, int setID){
+        return false;
     }
 
     /**

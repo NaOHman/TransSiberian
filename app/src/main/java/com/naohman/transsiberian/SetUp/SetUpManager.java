@@ -36,16 +36,18 @@ public class SetUpManager {
         //TODO cancel all threads
     }
 
-    /*
-     * Add a new Runnable to the pool
+    /**
+     * Adds a new runnable to the pool
+     * @param r the runnable to add
      */
     public void post(Runnable r){
         executor.execute(r);
     }
 
 
-    /*
-     * start-up tasks
+    /**
+     * Asynchronously create a Russian Lucene Morphology
+     * @param appCtx the Application context
      */
     public void loadRusMorphology(final Context appCtx){
         executor.execute(new Runnable() {
@@ -56,6 +58,10 @@ public class SetUpManager {
         });
     }
 
+    /**
+     * Asynchronously create an English Lucene Morphology
+     * @param appCtx the Application context
+     */
     public void loadEngMorphology(final Context appCtx){
         executor.execute(new Runnable() {
             @Override
@@ -65,6 +71,10 @@ public class SetUpManager {
         });
     }
 
+    /**
+     * Asynchronously create a TextToSpeech handler
+     * @param appCtx the Application context
+     */
     public void loadTTS(final Context appCtx){
         executor.execute(new Runnable() {
             @Override
@@ -74,6 +84,10 @@ public class SetUpManager {
         });
     }
 
+    /**
+     * asynchronously load the translation dictionary
+     * @param appCtx the Application context
+     */
     public void loadDictionary(final Context appCtx){
         executor.execute(new Runnable() {
             @Override
@@ -83,6 +97,10 @@ public class SetUpManager {
         });
     }
 
+    /**
+     * asynchronously load the Quizlet database
+     * @param appCtx the Application context
+     */
     public void loadQuizlet(final Context appCtx){
         executor.execute(new Runnable() {
             @Override

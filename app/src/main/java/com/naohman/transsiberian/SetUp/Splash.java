@@ -1,7 +1,6 @@
 package com.naohman.transsiberian.SetUp;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.*;
 import android.view.View;
@@ -20,11 +19,11 @@ import com.naohman.language.transsiberian.R;
  * Splash screen that shows a train running across the screen
  * Also begins the process of initialization
  */
-public class Splash extends Activity implements ViewSwitcher.ViewFactory{
+public class Splash extends Activity implements ViewSwitcher.ViewFactory {
     private ProgressBar pb_loading;
     private ImageSwitcher switcher;
     final int[] images = {R.drawable.car2, R.drawable.car1, R.drawable.car4, R.drawable.car3};
-    int lastImage = 0;
+    int imageNumber = 0;
     @Override
     public void onCreate(Bundle savedInstance){
         super.onCreate(savedInstance);
@@ -44,44 +43,30 @@ public class Splash extends Activity implements ViewSwitcher.ViewFactory{
         switcher.setImageResource(R.drawable.color_train);
     }
 
-    public Runnable nextRunnable(){
-        if (lastImage >= images.length){
-            return new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(Splash.this, Landing.class);
-                    startActivity(intent);
-                }
-            };
-        } else {
-            final int i = lastImage;
-            lastImage++;
-            return new Runnable(){
-                @Override
-                public void run() {
-                    switcher.setImageResource(images[i]);
-                }
-            };
-        }
-    }
-
+    /**
+     * creates an image view for the image switcher
+     * the image view loads the next train car or the landing page when
+     * it's animation is completed
+     * @return the view
+     */
     @Override
     public View makeView() {
-        ImageView myView = new AnimatedImageView(this);
+        ImageView myView = new ImageView(this) {
+            @Override
+            public void onAnimationEnd(){
+                if (imageNumber >= images.length - 1) {
+                    Intent intent = new Intent(Splash.this, Landing.class);
+                    startActivity(intent);
+                } else {
+                    imageNumber++;
+                    switcher.setImageResource(images[imageNumber]);
+                }
+            }
+        };
         myView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         myView.setLayoutParams(new ImageSwitcher.LayoutParams
                 (ViewGroup.LayoutParams.MATCH_PARENT,
                  ViewGroup.LayoutParams.MATCH_PARENT));
         return myView;
-    }
-
-    private class AnimatedImageView extends ImageView {
-        public AnimatedImageView(Context c){
-            super(c);
-        }
-        @Override
-        public void onAnimationEnd(){
-            nextRunnable().run();
-        }
     }
 }

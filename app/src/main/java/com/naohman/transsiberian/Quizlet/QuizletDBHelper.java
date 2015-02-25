@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * Created by jeffrey on 1/26/15.
+ * Handles interactions with the Quizlet database
  */
 public class QuizletDBHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "quizlet.db";

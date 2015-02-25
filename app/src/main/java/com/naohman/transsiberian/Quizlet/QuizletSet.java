@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * Created by jeffrey on 1/26/15.
+ * POJO that Represents a quizlet set. There is no fancy logic here.
  */
 public class QuizletSet implements Serializable{
     private long _id;

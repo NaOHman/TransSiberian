@@ -18,6 +18,9 @@ import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.Quizlet.Quizlet;
 
 
+/**
+ * an Activity that lets people create a new set
+ */
 public class NewSet extends ActionBarActivity implements TextView.OnEditorActionListener {
     private RadioGroup term_lang;
     private EditText set_name;
@@ -34,6 +37,7 @@ public class NewSet extends ActionBarActivity implements TextView.OnEditorAction
         set_name = (EditText) findViewById(R.id.set_name);
         set_description = (EditText) findViewById(R.id.set_description);
         set_description.setOnEditorActionListener(this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public void createSet(View v){
@@ -65,23 +69,16 @@ public class NewSet extends ActionBarActivity implements TextView.OnEditorAction
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_new_set, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

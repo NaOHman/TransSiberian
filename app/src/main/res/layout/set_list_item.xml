@@ -9,8 +9,7 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_weight="8"
-        android:orientation="vertical"
-        android:onClick="itemSelected">
+        android:orientation="vertical">
         <TextView
             android:id="@+id/title_tv"
             android:layout_width="fill_parent"
@@ -36,6 +35,5 @@
         android:layout_weight="2"
         android:scaleType="center"
         android:background="@android:color/transparent"
-        android:onClick="remove"
         />
 </LinearLayout>

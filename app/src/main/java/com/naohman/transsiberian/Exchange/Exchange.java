@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.naohman.language.transsiberian.R;
-import com.naohman.transsiberian.Study.QuadraticAnimation;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;

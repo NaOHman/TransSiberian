@@ -22,79 +22,53 @@ import com.naohman.transsiberian.Quizlet.Quizlet;
 
 import java.util.List;
 
+/**
+ * Created By Jeffrey Lyman
+ * an activity that displays all available sets and allows users to pick one to study
+ */
 public class SetListActivity extends ActionBarActivity {
     private ListView sets;
+    private Quizlet quizlet;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_list);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
         sets = (ListView) findViewById(R.id.set_listview);
-        Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet = Quizlet.getInstance(getApplicationContext());
         quizlet.open();
         List<QuizletSet> setList = quizlet.getAllSets();
         SetAdapter adapter = new SetAdapter(this, R.layout.set_list_item, setList);
         sets.setAdapter(adapter);
     }
 
-    public void createSet(View v){
-        Intent intent = new Intent(this, NewSet.class);
-        startActivity(intent);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_set, menu);
+        getMenuInflater().inflate(R.menu.menu_set_list, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.new_set) {
+            Intent intent = new Intent(this, NewSet.class);
+            startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public void itemSelected(View view) {
-        QuizletSet mySet = (QuizletSet) view.findViewById(R.id.title_tv).getTag();
-        Intent intent = new Intent(this, Study.class);
-        intent.putExtra("set", mySet);
-        startActivity(intent);
-    }
 
-    public void remove(View view) {
-        final QuizletSet mySet = (QuizletSet) view.findViewById(R.id.remove_button).getTag();
-        new AlertDialog.Builder(this)
-                .setTitle("Delete set")
-                .setMessage("Are you sure you want to delete " + mySet.getTitle())
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
-                        quizlet.deleteSet(mySet);
-                        List<QuizletSet> setList = quizlet.getAllSets();
-                        SetAdapter adapter = new SetAdapter(SetListActivity.this, R.layout.set_list_item, setList);
-                        sets.setAdapter(adapter);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).setCancelable(false)
-                .show();
-    }
-
+    /**
+     * an ArrayAdapter that uses closures to handle clicks from multiple items
+     * without the need for messy tags
+     */
     private class SetAdapter extends ArrayAdapter<QuizletSet> {
         public SetAdapter(Context context, int resource, List<QuizletSet> sets) {
             super(context, resource, sets);
@@ -102,18 +76,60 @@ public class SetListActivity extends ActionBarActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent){
+            final QuizletSet mySet = getItem(position);
             LayoutInflater inflater = getLayoutInflater();
             View myView = inflater.inflate(R.layout.set_list_item, parent, false);
             TextView title = (TextView) myView.findViewById(R.id.title_tv);
             TextView description = (TextView) myView.findViewById(R.id.description_tv);
             ImageButton btn = (ImageButton) myView.findViewById(R.id.remove_button);
-            QuizletSet mySet = getItem(position);
+            View text_section = myView.findViewById(R.id.text_section);
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v){
+                    SetListActivity.this.remove(mySet);
+                }
+            });
+            text_section.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    quizlet.open();
+                    Intent intent;
+                    //if the set has no terms, take the user to the edit page
+                    if (quizlet.getSetTerms(mySet.get_id()).isEmpty())
+                        intent = new Intent(SetListActivity.this, SetActivity.class);
+                    else
+                        intent = new Intent(SetListActivity.this, Study.class);
+                    quizlet.close();
+                    intent.putExtra("set", mySet);
+                    startActivity(intent);
+                }
+            });
             title.setText(mySet.getTitle());
-            title.setTag(mySet);
             description.setText(mySet.getDescription());
-            description.setTag(mySet);
-            btn.setTag(mySet);
             return myView;
         }
+    }
+
+    public void remove(final QuizletSet mySet) {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.delete_set))
+                .setMessage(getString(R.string.delete_set_prompt) + mySet.getTitle())
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        quizlet.deleteSet(mySet);
+                        List<QuizletSet> setList = quizlet.getAllSets();
+                        SetAdapter adapter = new SetAdapter(SetListActivity.this, R.layout.set_list_item, setList);
+                        sets.setAdapter(adapter);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setCancelable(false)
+                .show();
     }
 }

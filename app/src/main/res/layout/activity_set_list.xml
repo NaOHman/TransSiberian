@@ -9,15 +9,6 @@
     <ListView
         android:id="@+id/set_listview"
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
         </ListView>
-    <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:onClick="createSet"
-        android:textColor="@color/hi_fg_1"
-        android:background="@color/hi_bg_1"
-        android:text="@string/new_set"
-        />
 </LinearLayout>
