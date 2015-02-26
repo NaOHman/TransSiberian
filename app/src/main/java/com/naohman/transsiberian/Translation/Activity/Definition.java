@@ -46,7 +46,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/*
+/**
  * Created by Jeffrey Lyman
  * An activity for displaying a chosen keyword-definition pair
  * Shows the results of google image searches for the keyword
@@ -65,10 +65,11 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     private static Animation lIn, lOut, rIn, rOut;
     private TextView tv_keyword;
 
-    //TODO add look up function
+    //TODO make modular activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_definition);
         SetUpManager sMgr = new SetUpManager();
         sMgr.loadTTS(getApplicationContext());

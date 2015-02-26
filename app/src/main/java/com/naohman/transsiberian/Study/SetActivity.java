@@ -1,24 +1,19 @@
 package com.naohman.transsiberian.Study;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Message;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,17 +30,19 @@ import java.util.List;
  * An activity that displays information about a set an allows
  * users to edit their terms
  */
-public class SetActivity extends ActionBarActivity {
+public class SetActivity extends ActionBarActivity implements NewTermListener {
     private QuizletSet mySet;
     private Quizlet quizlet;
     private TextView title_tv, description_tv;
     private ListView term_view;
     private List<Term> terms;
+    private FragmentManager fm = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mySet = (QuizletSet) getIntent().getSerializableExtra("set");
         title_tv = (TextView) findViewById(R.id.set_title);
         title_tv.setText(mySet.getTitle());
@@ -59,128 +56,30 @@ public class SetActivity extends ActionBarActivity {
     }
 
     /**
-     * Private class representing the new term and edit term dialogs
+     * Called by TermFragment when a new term has been created
+     * @param term the new term
+     * @param definition the new definition
      */
-    private class TermDialog extends AlertDialog {
-        private EditText defET, termET;
-        private final Term oldTerm;
-        public TermDialog(Term oldTerm) {
-            super(SetActivity.this);
-            setUp();
-            this.oldTerm = oldTerm;
-            defET.setText(oldTerm.getDefinition());
-            termET.setText(oldTerm.getTerm());
-            setButton(BUTTON_POSITIVE, getString(R.string.save), (Message) null);
-        }
-
-        public TermDialog() {
-            super(SetActivity.this);
-            setUp();
-            oldTerm = null;
-            setButton(BUTTON_POSITIVE, getString(R.string.save_and_exit), (Message) null);
-            setButton(BUTTON_NEUTRAL, getString(R.string.save), (Message) null);
-        }
-
-        private void setUp() {
-            View v = getLayoutInflater().inflate(R.layout.fragment_add_term, null, false);
-            defET = (EditText) v.findViewById(R.id.term_definition);
-            termET = (EditText) v.findViewById(R.id.term_term);
-            setView(v);
-            setCancelable(false);
-            setButton(BUTTON_NEGATIVE, getString(R.string.cancel), (Message) null);
-            defET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_GO) {
-                        if (oldTerm == null) {
-                            TermDialog.this.getButton(BUTTON_NEUTRAL).callOnClick();
-                            focusKeyboard(termET);
-                        } else {
-                            TermDialog.this.getButton(BUTTON_POSITIVE).callOnClick();
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            });
-        }
-
-        /**
-         * Onclick methods are overridden here so that they prevent dialog from closing
-         */
-        @Override
-        public void show() {
-            super.show();
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            focusKeyboard(termET);
-            getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean success = addTerm(termET.getText().toString(),
-                            defET.getText().toString(), oldTerm);
-                    if (success)
-                        dismiss();
-                }
-            });
-            if (oldTerm == null){
-                getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        boolean success = addTerm(termET.getText().toString(),
-                                defET.getText().toString(), null);
-                        if (success){
-                            defET.setText("");
-                            termET.setText("");
-                        }
-                    }
-                });
-            }
-        }
-
-        @Override
-        protected void onStop() {
-//            SetActivity.this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            super.onStop();
-        }
-    }
-
-    public void focusKeyboard(View v){
-        if (v.requestFocus()) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
-        }
+    @Override
+    public void addTerm(String term, String definition) {
+        quizlet.createTerm(mySet.get_id(), term, definition);
+        terms = quizlet.getSetTerms(mySet.get_id());
+        term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
     }
 
     /**
-     * adds a new term to the set, alerts user if the input has an error
-     * @param term the term keyword
-     * @param definition the term definition
-     * @param oldTerm the term being edited
-     * @return whether the term was successfully added
+     * Called by TermFragment when a term has been edited
+     * @param oldTerm the term to be edited
+     * @param term the new term
+     * @param definition the new definition
      */
-    public boolean addTerm(String term, String definition, Term oldTerm){
-        if (term.matches("\\s*") || definition.matches("\\s*")) {
-            String errMsg = "Please enter a Definition";
-            if (term.matches("\\s*"))
-                errMsg = "Please Enter a Term";
-            new AlertDialog.Builder(this)
-                .setTitle("Invalid input")
-                .setMessage(errMsg)
-                .setNegativeButton("Okay", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
-        } else {
-            if (oldTerm != null)
-                quizlet.removeTerm(oldTerm);
-            quizlet.createTerm(mySet.get_id(), term, definition);
-            terms = quizlet.getSetTerms(mySet.get_id());
-            term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
-            return true;
-        }
-        return false;
+    @Override
+    public void editTerm(Term oldTerm, String term, String definition) {
+         if (oldTerm != null)
+            quizlet.removeTerm(oldTerm);
+        quizlet.createTerm(mySet.get_id(), term, definition);
+        terms = quizlet.getSetTerms(mySet.get_id());
+        term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
     }
 
     /**
@@ -212,7 +111,8 @@ public class SetActivity extends ActionBarActivity {
             text_section.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new TermDialog(myTerm).show();
+                    TermFragment tf =  TermFragment.newInstance(myTerm);
+                    tf.show(fm, "Edit term fragment");
                 }
             });
             title.setText(myTerm.getTerm());
@@ -235,7 +135,8 @@ public class SetActivity extends ActionBarActivity {
                 study();
                 return true;
             case R.id.new_term:
-                new TermDialog().show();
+                TermFragment tf = TermFragment.newInstance();
+                tf.show(fm, "new term fragment");
                 return true;
             case android.R.id.home:
                 if (terms.isEmpty()) {

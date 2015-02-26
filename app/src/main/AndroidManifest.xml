@@ -23,11 +23,21 @@
         </activity>
         <activity
             android:name="com.naohman.transsiberian.Translation.Activity.Definition"
-            android:label="@string/title_activity_definition" >
+            android:label="@string/title_activity_definition"
+            android:parentActivityName="com.naohman.transsiberian.Translation.Activity.Translate" >
+            <!-- Parent activity meta-data to support API level 7+ -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.naohman.transsiberian.Translation.Activity.Translate" />
         </activity>
         <activity
             android:name="com.naohman.transsiberian.Translation.Activity.Translate"
-            android:label="@string/title_activity_translate" >
+            android:label="@string/title_activity_translate"
+            android:parentActivityName="com.naohman.transsiberian.SetUp.Landing" >
+            <!-- Parent activity meta-data to support API level 7+ -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.naohman.transsiberian.SetUp.Landing" />
         </activity>
         <activity
             android:name="com.naohman.transsiberian.SetUp.Landing"

@@ -113,7 +113,7 @@ public class SetListActivity extends ActionBarActivity {
     public void remove(final QuizletSet mySet) {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.delete_set))
-                .setMessage(getString(R.string.delete_set_prompt) + mySet.getTitle())
+                .setMessage(getString(R.string.delete_set_prompt) +" "+ mySet.getTitle())
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

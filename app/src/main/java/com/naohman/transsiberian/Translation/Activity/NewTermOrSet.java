@@ -34,6 +34,7 @@ public class NewTermOrSet extends ActionBarActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_new_term_or_set);
         setView = (ListView) findViewById(R.id.set_lv);
         term = (EditText) findViewById(R.id.enter_term);

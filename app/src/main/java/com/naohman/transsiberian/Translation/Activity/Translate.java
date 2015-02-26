@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+/**
+ * Created by Jeffrey Lyman
+ * An activity that allows users translate words between english and russian
+ */
 public class Translate extends ActionBarActivity implements
         View.OnClickListener, SpanListener, TextView.OnEditorActionListener {
     private EditText et_keyword;
@@ -40,10 +44,11 @@ public class Translate extends ActionBarActivity implements
     private Stack<TranslationListAdapter> previous = new Stack<>();
     private TranslationListAdapter current = null;
 
-
+    //TODO handle up navigation somehow
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_translate);
         SetUpManager sMgr = new SetUpManager();
         sMgr.loadDictionary(getApplicationContext());
@@ -59,19 +64,37 @@ public class Translate extends ActionBarActivity implements
         btn_translate.setOnClickListener(Translate.this);
     }
 
+    /**
+     * translate the word that the user gave
+     * @param v the view that called this
+     */
     @Override
     public void onClick(View v) {
         String keyword = et_keyword.getText().toString();
         makeTranslations(keyword);
     }
 
+    /**
+     * Find the translations of a given word and display to the user
+     * This can take a long time depending on which objects have been loaded
+     * so it is executed asynchronously
+     * @param keyword the search query
+     */
     public void makeTranslations(String keyword) {
         new AsyncTask<String,Void,List<DictEntry>>(){
+            /**
+             * Display a loading spinner and hide previous translations
+             */
             @Override
             protected void onPreExecute(){
                 pb_loading.setVisibility(View.VISIBLE);
                 lv_translation.setVisibility(View.GONE);
             }
+
+            /**
+             * @param params The search query
+             * @return a list of results for the query
+             */
             @Override
             protected List<DictEntry> doInBackground(String... params) {
                 List<DictEntry> entries;
@@ -83,6 +106,11 @@ public class Translate extends ActionBarActivity implements
                 }
                 return entries;
             }
+
+            /**
+             * Remove the loading Spinner display results
+             * @param entries the results of the query
+             */
             @Override
             protected void onPostExecute(List<DictEntry> entries){
                 pb_loading.setVisibility(View.GONE);
@@ -94,6 +122,9 @@ public class Translate extends ActionBarActivity implements
         }.execute(keyword);
     }
 
+    /**
+     * @param translations a list of query results to be shown to the user
+     */
     public void setTranslation(List<DictEntry> translations){
         if (translations == null || translations.size() == 0){
             List<DictEntry> entries = new ArrayList();
@@ -106,11 +137,23 @@ public class Translate extends ActionBarActivity implements
         lv_translation.setSelectionAfterHeaderView();
     }
 
+    /**
+     * called when a user clicks on a reference link
+     * @param v the view holding the link
+     * @param entry the dict entry containing the word
+     * @param word the word itself
+     */
     @Override
     public void onReferenceClick(View v, DictEntry entry, String word){
         makeTranslations(word);
     }
 
+    /**
+     * called when a user clicks a definition link
+     * @param v the view holding the link
+     * @param entry the dict entry containing the word
+     * @param word the word itself
+     */
     @Override
     public void onDefinitionClick(View v, DictEntry entry, String word){
         Intent startDef = new Intent(this, Definition.class);
@@ -119,6 +162,11 @@ public class Translate extends ActionBarActivity implements
         startActivity(startDef);
     }
 
+    /**
+     * called when a user clicks a keyword
+     * @param v the view holding the link
+     * @param entry the entry containing the word
+     */
     @Override
     public void onKeywordClick(View v, DictEntry entry){
         Intent startDef = new Intent(this, Definition.class);
@@ -127,6 +175,9 @@ public class Translate extends ActionBarActivity implements
         startActivity(startDef);
     }
 
+    /**
+     * show previous translations or finish the activity
+     */
     @Override
     public void onBackPressed(){
         if (previous.isEmpty()){
@@ -140,32 +191,26 @@ public class Translate extends ActionBarActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_translate, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onDestroy() {
-        DictionaryHandler.getInstance(null).close();
-        super.onDestroy();
-    }
-
+    /**
+     * Enter query when the user hits go
+     * @param v the view
+     * @param actionId the id of the action
+     * @param event the event of the action
+     * @return whether the event was handled
+     */
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_GO){
@@ -174,6 +219,9 @@ public class Translate extends ActionBarActivity implements
         return false;
     }
 
+    /**
+     * a custom list adapter for displaying translations
+     */
     private class TranslationListAdapter extends ArrayAdapter<DictEntry> {
         public TranslationListAdapter(Context context, int resource, List<DictEntry> entries) {
             super(context, resource, entries);
