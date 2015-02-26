@@ -1,11 +1,12 @@
 package com.naohman.transsiberian.Study;
 
 import android.app.AlertDialog;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import com.naohman.transsiberian.Quizlet.QuizletSet;
 import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.Quizlet.Quizlet;
+import com.naohman.transsiberian.Quizlet.SetFragment;
+import com.naohman.transsiberian.Quizlet.Term;
 
 import java.util.List;
 
@@ -26,25 +29,28 @@ import java.util.List;
  * Created By Jeffrey Lyman
  * an activity that displays all available sets and allows users to pick one to study
  */
-public class SetListActivity extends ActionBarActivity {
+public class SetListActivity extends ActionBarActivity implements SetFragment.NewSetListener{
     private ListView sets;
     private Quizlet quizlet;
+    private FragmentManager fm = getSupportFragmentManager();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_list);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
         sets = (ListView) findViewById(R.id.set_listview);
         quizlet = Quizlet.getInstance(getApplicationContext());
         quizlet.open();
-        List<QuizletSet> setList = quizlet.getAllSets();
-        SetAdapter adapter = new SetAdapter(this, R.layout.set_list_item, setList);
-        sets.setAdapter(adapter);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    /**
+     * Make sure we refresh the set list as it may have changed
+     */
+    @Override
+    public void onResume(){
+        super.onResume();
+        reloadSetList();
     }
 
     @Override
@@ -57,13 +63,79 @@ public class SetListActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.new_set) {
-            Intent intent = new Intent(this, NewSet.class);
-            startActivity(intent);
+            SetFragment setFragment = SetFragment.newInstance();
+            setFragment.show(fm, "new set");
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Add a set to the database and reload the set list
+     * @param title the title of the set
+     * @param description the description of the set
+     * @param termLang the language of the terms in the set
+     * @param defLang the language of the definitions in the set
+     */
+    @Override
+    public void addSet(String title, String description, String termLang, String defLang) {
+        QuizletSet set = quizlet.createSet(title, description, termLang, defLang);
+        Intent intent = new Intent(this, SetActivity.class);
+        intent.putExtra(SetActivity.SET, set);
+        intent.putExtra(SetActivity.NEW, true);
+        startActivity(intent);
+    }
+
+    /**
+     * Edit a set and reload the set list
+     * @param oldSet the set being edited
+     * @param title the title of the set
+     * @param description the description of the set
+     * @param termLang the language of the terms in the set
+     * @param defLang the language of the definitions in the set
+     */
+    @Override
+    public void editSet(QuizletSet oldSet, String title, String description, String termLang, String defLang) {
+        final List<Term> terms = quizlet.getSetTerms(oldSet.get_id());
+        quizlet.deleteSet(oldSet);
+        final QuizletSet newSet = quizlet.createSet(title, description, termLang, defLang);
+
+        //if the user switched the term and definition languages, offer to switch the
+        //terms and the definitions in the set
+        if (!termLang.equals(oldSet.getLang_terms()) && !defLang.equals(oldSet.getLang_definitions())){
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.switch_languages)
+                    .setCancelable(false)
+                    .setNegativeButton(R.string.no_thanks, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            for (Term term : terms)
+                                quizlet.createTerm(newSet.get_id(), term.getDefinition(), term.getTerm());
+                        }
+                    })
+                    .setPositiveButton(R.string.sure, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            for (Term term : terms)
+                                quizlet.createTerm(newSet.get_id(), term.getTerm(), term.getDefinition());
+                        }
+                    }).show();
+        } else {
+            for (Term term : terms)
+                quizlet.createTerm(newSet.get_id(), term.getTerm(), term.getDefinition());
+        }
+        reloadSetList();
+    }
+
+    /**
+     * Pulls sets from database and displays them in the list view
+     */
+    public void reloadSetList(){
+        List<QuizletSet> setList = quizlet.getAllSets();
+        SetAdapter adapter = new SetAdapter(this, R.layout.set_list_item, setList);
+        sets.setAdapter(adapter);
+    }
 
     /**
      * an ArrayAdapter that uses closures to handle clicks from multiple items
@@ -83,12 +155,18 @@ public class SetListActivity extends ActionBarActivity {
             TextView description = (TextView) myView.findViewById(R.id.description_tv);
             ImageButton btn = (ImageButton) myView.findViewById(R.id.remove_button);
             View text_section = myView.findViewById(R.id.text_section);
+            /**
+             * remove the set if the remove button is clicked
+             */
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v){
                     SetListActivity.this.remove(mySet);
                 }
             });
+            /**
+             * On click open the study page, or the set page if there are no terms
+             */
             text_section.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -100,8 +178,20 @@ public class SetListActivity extends ActionBarActivity {
                     else
                         intent = new Intent(SetListActivity.this, Study.class);
                     quizlet.close();
-                    intent.putExtra("set", mySet);
+                    intent.putExtra(SetActivity.SET, mySet);
                     startActivity(intent);
+                }
+            });
+
+            /**
+             * On a long press, edit the current set
+             */
+            text_section.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    SetFragment setFragment = SetFragment.newInstance(mySet);
+                    setFragment.show(fm, "Edit set");
+                    return true;
                 }
             });
             title.setText(mySet.getTitle());
@@ -110,10 +200,14 @@ public class SetListActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * make sure the user is prepared to delete a set then remove it
+     * @param mySet the set to be removed
+     */
     public void remove(final QuizletSet mySet) {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.delete_set))
-                .setMessage(getString(R.string.delete_set_prompt) +" "+ mySet.getTitle())
+                .setMessage(getString(R.string.delete_set_prompt) +" "+ mySet.getTitle() + "?")
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

@@ -59,19 +59,14 @@ public class Quizlet {
      * @param termLang the language of the terms, the definition language is infered
      * @return the resulting quizlet set
      */
-    public QuizletSet createSet(String name, String description, String termLang){
+    public QuizletSet createSet(String name, String description, String termLang, String defLang){
         if (db == null)
             open();
         ContentValues values = new ContentValues();
         values.put(QuizletDBHelper.SET_NAME, name);
         values.put(QuizletDBHelper.SET_DESCRIPTION, description);
-        if (termLang.equals(RUSSIAN)){
-            values.put(QuizletDBHelper.SET_LANG_TERM, RUSSIAN);
-            values.put(QuizletDBHelper.SET_LANG_DEF, ENGLISH);
-        } else {
-            values.put(QuizletDBHelper.SET_LANG_TERM, ENGLISH);
-            values.put(QuizletDBHelper.SET_LANG_DEF, RUSSIAN);
-        }
+        values.put(QuizletDBHelper.SET_LANG_TERM, termLang);
+        values.put(QuizletDBHelper.SET_LANG_DEF, defLang);
         long id = db.insert(QuizletDBHelper.TABLE_SETS, null, values);
         Cursor cursor = db.query(QuizletDBHelper.TABLE_SETS, set_columns,
                 QuizletDBHelper.COLUMN_ID + "=" + id, null, null, null, null);

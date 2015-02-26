@@ -163,7 +163,7 @@ public class Study extends ActionBarActivity implements View.OnClickListener, Vi
 
     public void edit(View v){
         Intent intent = new Intent(this, SetActivity.class);
-        intent.putExtra("set", mySet);
+        intent.putExtra(SetActivity.SET, mySet);
         startActivity(intent);
     }
 

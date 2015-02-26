@@ -29,19 +29,24 @@ import java.util.List;
  * users to edit their terms
  */
 public class SetActivity extends ActionBarActivity implements TermFragment.NewTermListener {
+    public static final String NEW = "new";
+    public static final String SET = "set";
     private QuizletSet mySet;
     private Quizlet quizlet;
     private TextView title_tv, description_tv;
     private ListView term_view;
     private List<Term> terms;
     private FragmentManager fm = getSupportFragmentManager();
+    private boolean isNew;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mySet = (QuizletSet) getIntent().getSerializableExtra("set");
+        Intent intent = getIntent();
+        mySet = (QuizletSet) intent.getSerializableExtra(SET);
+        isNew = intent.getBooleanExtra(NEW, false);
         title_tv = (TextView) findViewById(R.id.set_title);
         title_tv.setText(mySet.getTitle());
         description_tv = (TextView) findViewById(R.id.set_description);
@@ -137,7 +142,7 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
                 tf.show(fm, "new term fragment");
                 return true;
             case android.R.id.home:
-                if (terms.isEmpty()) {
+                if (terms.isEmpty() || isNew) {
                     Intent intent = new Intent(this, SetListActivity.class);
                     startActivity(intent);
                     return true;

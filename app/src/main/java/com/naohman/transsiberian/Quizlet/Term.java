@@ -13,7 +13,7 @@ public class Term implements Serializable {
     private long setId;
     private long quizlet_id;
 
-    public Term(long _id, String term, String definition, long setId, long quizlet_id) {
+    protected Term(long _id, String term, String definition, long setId, long quizlet_id) {
         this._id = _id;
         this.term = term;
         this.definition = definition;

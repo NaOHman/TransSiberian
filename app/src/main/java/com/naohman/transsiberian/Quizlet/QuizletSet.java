@@ -1,5 +1,9 @@
 package com.naohman.transsiberian.Quizlet;
 
+import android.util.Log;
+
+import com.naohman.language.transsiberian.R;
+
 import java.io.Serializable;
 
 /**
@@ -14,7 +18,7 @@ public class QuizletSet implements Serializable{
     private String lang_terms;
     private String lang_definitions;
 
-    public QuizletSet(long _id, String title, String description,
+    protected QuizletSet(long _id, String title, String description,
                       String lang_terms, String lang_definitions, long setId) {
         this.title = title;
         this.description = description;
@@ -42,5 +46,27 @@ public class QuizletSet implements Serializable{
 
     public String getLang_terms() {
         return lang_terms;
+    }
+
+    public int getLang_termsPretty(){
+        Log.d("Term Language", lang_terms);
+        if (lang_terms.equals(Quizlet.RUSSIAN)) {
+            Log.d("terms", "Russian");
+            return R.string.russian_terms;
+        } else {
+            Log.d("terms", "English");
+            return R.string.english_terms;
+        }
+    }
+
+    public int getLang_definitionsPretty(){
+        Log.d("Def Language", lang_definitions);
+        if (lang_definitions.equals(Quizlet.RUSSIAN)) {
+            Log.d("defs", "Russian");
+            return R.string.russian_defs;
+        } else {
+            Log.d("defs", "English");
+            return R.string.english_defs;
+        }
     }
 }
