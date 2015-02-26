@@ -1,4 +1,4 @@
-package com.naohman.transsiberian.Study;
+package com.naohman.transsiberian.Quizlet;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.naohman.language.transsiberian.R;
-import com.naohman.transsiberian.Quizlet.Term;
 
 
 /**
@@ -48,6 +47,31 @@ public class TermFragment extends DialogFragment implements View.OnClickListener
         return new TermFragment();
     }
 
+    /**
+     * Inflate the TermFragment layout and preform necessary setup
+     * @return the inflated layout
+     */
+    private View makeView(){
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View myView = inflater.inflate(R.layout.fragment_add_term, null, false);
+        defET = (EditText) myView.findViewById(R.id.term_definition);
+        termET = (EditText) myView.findViewById(R.id.term_term);
+        myView.findViewById(R.id.swap).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CharSequence def = defET.getText();
+                defET.setText(termET.getText());
+                termET.setText(def);
+            }
+        });
+        defET.setOnEditorActionListener(this);
+        if (edit){
+            defET.setText(oldTerm.getDefinition());
+            termET.setText(oldTerm.getTerm());
+        }
+        return myView;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
         Bundle args = getArguments();
@@ -57,18 +81,11 @@ public class TermFragment extends DialogFragment implements View.OnClickListener
         } else {
             edit = false;
         }
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View myView = inflater.inflate(R.layout.fragment_add_term, null, false);
-        defET = (EditText) myView.findViewById(R.id.term_definition);
-        termET = (EditText) myView.findViewById(R.id.term_term);
-        defET.setOnEditorActionListener(this);
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity())
                 .setCancelable(false)
-                .setView(myView)
+                .setView(makeView())
                 .setNegativeButton(getString(R.string.cancel), null);
         if (edit) {
-            defET.setText(oldTerm.getDefinition());
-            termET.setText(oldTerm.getTerm());
             dialog.setPositiveButton(getString(R.string.save), null);
         } else {
             dialog.setPositiveButton(getString(R.string.save_and_exit), null);
@@ -167,4 +184,25 @@ public class TermFragment extends DialogFragment implements View.OnClickListener
         return true;
     }
 
+    /**
+     * Created by jeffrey on 2/25/15.
+     * An interface that allows an object to respond to requests to create or edit an object
+     */
+    public abstract interface NewTermListener {
+
+     /**
+     * Called when a new term is created
+     * @param term the new term
+     * @param definition the new definition
+     */
+    public void addTerm(String term, String definition);
+
+    /**
+     * Called when a term is edited
+     * @param oldTerm the old term object
+     * @param term the new term
+     * @param definition the new definition
+     */
+    public void editTerm(Term oldTerm, String term, String definition);
+    }
 }

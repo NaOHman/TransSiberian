@@ -1,11 +1,8 @@
 package com.naohman.transsiberian.Study;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -23,6 +20,7 @@ import com.naohman.transsiberian.Quizlet.QuizletSet;
 import com.naohman.transsiberian.Quizlet.Term;
 import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.Quizlet.Quizlet;
+import com.naohman.transsiberian.Quizlet.TermFragment;
 
 import java.util.List;
 
@@ -30,7 +28,7 @@ import java.util.List;
  * An activity that displays information about a set an allows
  * users to edit their terms
  */
-public class SetActivity extends ActionBarActivity implements NewTermListener {
+public class SetActivity extends ActionBarActivity implements TermFragment.NewTermListener {
     private QuizletSet mySet;
     private Quizlet quizlet;
     private TextView title_tv, description_tv;
