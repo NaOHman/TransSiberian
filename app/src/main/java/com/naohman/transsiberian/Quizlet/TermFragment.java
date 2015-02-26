@@ -24,16 +24,19 @@ import com.naohman.language.transsiberian.R;
  * A fragment that let's users enter new terms or edit existing ones
  */
 public class TermFragment extends DialogFragment implements View.OnClickListener, TextView.OnEditorActionListener {
-    private static final String OLD_TERM = "param1";
+    private static final String OLD_TERM = "old term";
+    private static final String TERM = "term";
+    private static final String DEF = "def";
     private NewTermListener termListener;
+    private String startDef = "", startTerm = "";
     private EditText termET, defET;
     private Term oldTerm;
-    private boolean edit;
+    private boolean edit, multiple;
     private AlertDialog myDialog;
 
     /**
      * @param oldTerm the old term to edit, if null create a new term.
-     * @return A new instance of fragment NewTermFragment.
+     * @return A new instance of TermFragment with the proper arguments
      */
     public static TermFragment newInstance(Term oldTerm) {
         TermFragment fragment = new TermFragment();
@@ -43,8 +46,40 @@ public class TermFragment extends DialogFragment implements View.OnClickListener
         return fragment;
     }
 
+    /**
+     * Make a new term with the given values for term and def
+     * @param term the starting value for term
+     * @param def the starting value for def
+     * @return a new instance of TermFragment with the proper arugments
+     */
+    public static TermFragment newInstance(String term, String def) {
+        TermFragment fragment = new TermFragment();
+        Bundle args = new Bundle();
+        args.putString(TERM, term);
+        args.putString(DEF, def);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public static TermFragment newInstance() {
         return new TermFragment();
+    }
+
+    public void parseArgs(){
+        Bundle args = getArguments();
+        if (args != null) {
+            multiple = false;
+            if (args.containsKey(OLD_TERM)) {
+                oldTerm = (Term) args.getSerializable(OLD_TERM);
+                edit = true;
+            } else {
+                startDef = args.getString(TERM, "");
+                startTerm = args.getString(DEF, "");
+            }
+        } else {
+            edit = false;
+            multiple = true;
+        }
     }
 
     /**
@@ -68,28 +103,25 @@ public class TermFragment extends DialogFragment implements View.OnClickListener
         if (edit){
             defET.setText(oldTerm.getDefinition());
             termET.setText(oldTerm.getTerm());
+        } else {
+            defET.setText(startDef);
+            termET.setText(startTerm);
         }
         return myView;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
-        Bundle args = getArguments();
-        if (args != null) {
-            oldTerm = (Term) args.getSerializable(OLD_TERM);
-            edit = true;
-        } else {
-            edit = false;
-        }
+        parseArgs();
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity())
                 .setCancelable(false)
                 .setView(makeView())
-                .setNegativeButton(getString(R.string.cancel), null);
-        if (edit) {
-            dialog.setPositiveButton(getString(R.string.save), null);
+                .setNegativeButton(R.string.cancel, null);
+        if (multiple) {
+            dialog.setPositiveButton(R.string.save_and_exit, null);
+            dialog.setNeutralButton(R.string.save, null);
         } else {
-            dialog.setPositiveButton(getString(R.string.save_and_exit), null);
-            dialog.setNeutralButton(getString(R.string.save), null);
+            dialog.setPositiveButton(R.string.save, null);
         }
         myDialog = dialog.show();
         myDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -148,14 +180,17 @@ public class TermFragment extends DialogFragment implements View.OnClickListener
         boolean valid = checkInput(term, definition);
         if (!valid)
             return;
-        if (edit){
-            termListener.editTerm(oldTerm, term, definition);
-            dismiss();
-        } else {
+        if (multiple){
             termListener.addTerm(term, definition);
             defET.setText("");
             termET.setText("");
             focusKeyboard(termET);
+        } else {
+            if (edit)
+                termListener.editTerm(oldTerm, term, definition);
+            else
+                termListener.addTerm(term, definition);
+            dismiss();
         }
     }
 

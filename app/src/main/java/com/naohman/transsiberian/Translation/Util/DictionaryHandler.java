@@ -25,8 +25,9 @@ public class DictionaryHandler {
         dbHelper = new DictionaryDBHelper(ctx);
     }
 
-    /*
+    /**
      * Potentially very costly, do not run on UI thread
+     * @param appCtx the application context
      */
     public static DictionaryHandler getInstance(Context appCtx){
         if (instance == null)
@@ -37,7 +38,7 @@ public class DictionaryHandler {
         return instance;
     }
 
-    /*
+    /**
      * Initialize DB connection call this the first time you need the Dictionary
      */
     public void open() {
@@ -45,7 +46,7 @@ public class DictionaryHandler {
             database = dbHelper.getReadableDatabase();
     }
 
-    /*
+    /**
      * close DB connection call this when the DB is no longer active
      */
     public void close() {
@@ -53,25 +54,33 @@ public class DictionaryHandler {
             database.close();
     }
 
-    /*
+    /**
      * Queries the database to find translations for given words.
      * If it can't find a word, it tries to put words into 'dictionary form'
      * and tries again before giving up.
      * Note that this is an expensive call and could possibly trigger other
      * expensive operations
+     * @param keyword the keyword to search
+     * @param appCtx the application context
+     * @return a list of Dictionary Entries representing the translations
      */
     public List<DictEntry> getTranslations(String keyword, Context appCtx) {
         keyword = keyword.toLowerCase();
         Cursor cursor = queryKeyword(keyword);
         List<DictEntry> entries = new ArrayList<>();
         List<String> rawEntries = new ArrayList<>();
+        //No entries found, damage control time
         if (cursor.getCount() == 0) {
+            //Try to find the root word of the query
             List<String> morphs = getDictionaryForms(keyword, appCtx);
+            //No roots were found, try splitting the phrase
             if (morphs == null || morphs.size() == 0){
                 Log.d("No Morphs", keyword);
                 String[] words = keyword.split("\\s");
+                //If there's only one word give up
                 if (words.length > 1){
                     Log.d("Multiple words", ""+ words.length);
+                    //Query each word and add them to the list of return values
                     for (String word : words){
                         List<DictEntry> entryList = getTranslations(word, appCtx);
                         Log.d("Looking for", word);
@@ -84,19 +93,23 @@ public class DictionaryHandler {
                     return null;
                 }
             }
+            //turn the query cursor into a list of DictEntries
             for (String morph : morphs) {
                 cursor = queryKeyword(morph);
                 rawEntries.addAll(getColumns(cursor, 1));
             }
         }
+        //turn the query cursor into a list of DictEntries
         rawEntries = getColumns(cursor, 1);
         for (String entry : rawEntries)
             entries.add(new DictEntry(entry));
         return entries;
     }
 
-    /*
-     * returns the dictionary form of a word
+    /**
+     * @param keyword the search query
+     * @param appCtx the application context
+     * @return the possible root words of the keyword
      */
     public static List<String> getDictionaryForms(String keyword, Context appCtx) {
         keyword = keyword.replaceAll("to\\s", "");
@@ -114,9 +127,9 @@ public class DictionaryHandler {
         }
     }
 
-    /*
-     * returns a cursor representing a DB query for the
-     * specified keyword
+    /**
+     * @param keyword a search query
+     * @returns a cursor representing a database search for that keyword
      */
     private Cursor queryKeyword(String keyword) {
         String[] whereArgs = {keyword};
@@ -133,8 +146,10 @@ public class DictionaryHandler {
         return cursor;
     }
 
-    /*
-     * returns all the entries in a column that a cursor points to
+    /**
+     * @param c a cursor into the database
+     * @param col the column we want to return
+     * @returns all the entries in a column that a cursor points to
      */
     private static List<String> getColumns(Cursor c, int col) {
         List<String> entries = new ArrayList<>();
@@ -147,15 +162,17 @@ public class DictionaryHandler {
         return entries;
     }
 
-    /*
-     * matches Cyrillic characters and spaces
+    /**
+     * @param s a string of characters
+     * @return whether that string could be a russian word or phrase
      */
     public static boolean isRussian(String s) {
         return s.matches("[ а-яА-Я]+");
     }
 
-    /*
-     * matches Roman characters and spaces
+    /**
+     * @param s a string of characters
+     * @return whether that string could be an english word or phase
      */
     public static boolean isEnglish(String s) {
         return s.matches("[ a-zA-Z]+");

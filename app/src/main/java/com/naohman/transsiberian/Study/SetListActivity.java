@@ -206,9 +206,9 @@ public class SetListActivity extends ActionBarActivity implements SetFragment.Ne
      */
     public void remove(final QuizletSet mySet) {
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.delete_set))
-                .setMessage(getString(R.string.delete_set_prompt) +" "+ mySet.getTitle() + "?")
-                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                .setTitle(R.string.delete_set)
+                .setMessage(R.string.delete_set_prompt +" "+ mySet.getTitle() + "?")
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         quizlet.deleteSet(mySet);
@@ -218,7 +218,7 @@ public class SetListActivity extends ActionBarActivity implements SetFragment.Ne
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();

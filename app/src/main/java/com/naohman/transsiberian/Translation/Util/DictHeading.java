@@ -44,33 +44,13 @@ public class DictHeading {
         }
     }
 
-    /*
-    public static String parse(String text, int prefixLevel){
-        if (text == "")
-            return "";
-        String parsed;
-        List<String> sections = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
-        //Not every level of prefix gets used
-        while (sections.size() < 2 && prefixLevel < MAX_PREFIX) {
-            prefixLevel++;
-            sections = breakHeadings(text, FIRST_PREFIX[prefixLevel], prefixLevel);
-        }
-        if (sections.size() > 0 && prefixLevel < MAX_PREFIX)
-            parsed = sections.get(0);
-        else
-            parsed = text;
-        if (sections.size() > 1){
-            for (int i=1; i<sections.size(); i++){
-                parsed += parse(sections.get(i), prefixLevel+1);
-            }
-        }
-        return "<br><section>" + parsed + "</section>";
-    }
-    */
-
-    /*
+    /**
      * break the text into a list of sections where the first section contains
      * the contents of a the text and the others, the text that forms the subHeadings
+     * @param text the text to break
+     * @param prefix the prefix to break on
+     * @param prefixLevel the level of prefix ex. 2) 2. II B
+     * @return the broken text
      */
     private static List<String> breakHeadings(String text, String prefix, int prefixLevel){
         List<String> headings = new ArrayList<>();
@@ -85,6 +65,12 @@ public class DictHeading {
         return headings;
     }
 
+    /**
+     * Return a spannable string representation of this heading
+     * @param indent the amount to indent each section
+     * @param handler the tag handler used to convert the section
+     * @return the spanned text
+     */
     public SpannableStringBuilder toSpan(int indent, Html.TagHandler handler){
         SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("\u200B"+contents,null, handler);
         s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
@@ -96,9 +82,10 @@ public class DictHeading {
         return s;
     }
 
-    /*
-     * generates the next prefix given the prefix level and the
-     * current prefix. ex. <b>II</b> => <b>III</b>
+    /**
+     * @param level the prefix level eg 2. 2) II. etc
+     * @param current the current prefix
+     * @return the next prefix on the same level ex. <b>II</b> => <b>III</b>
      */
     private static String nextPrefix(int level, String current){
         String next;
@@ -123,8 +110,10 @@ public class DictHeading {
         return next;
     }
 
-    /*
+    /**
      * ONLY WORKS FOR VALUES < 40!!!
+     * @param current the current roman numeral
+     * @return the next roman numeral
      */
     private static String nextRomanNumeral(String current){
         current += 'I';

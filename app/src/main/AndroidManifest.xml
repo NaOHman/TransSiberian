@@ -33,6 +33,7 @@
         <activity
             android:name="com.naohman.transsiberian.Translation.Activity.Translate"
             android:label="@string/title_activity_translate"
+            android:launchMode="singleTop"
             android:parentActivityName="com.naohman.transsiberian.SetUp.Landing" >
             <!-- Parent activity meta-data to support API level 7+ -->
             <meta-data
@@ -91,16 +92,6 @@
                 android:value="com.naohman.transsiberian.SetUp.Landing" />
         </activity>
         <activity
-            android:name="com.naohman.transsiberian.Study.NewSet"
-            android:label="@string/title_activity_new_set"
-            android:noHistory="true"
-            android:parentActivityName="com.naohman.transsiberian.Study.SetListActivity" >
-            <!-- Parent activity meta-data to support API level 7+ -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.naohman.transsiberian.Study.SetListActivity" />
-        </activity>
-        <activity
             android:name="com.naohman.transsiberian.Study.SetActivity"
             android:label="@string/title_activity_set"
             android:parentActivityName="com.naohman.transsiberian.Study.SetListActivity" >
@@ -109,10 +100,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.naohman.transsiberian.Study.SetListActivity" />
             >
-        </activity>
-        <activity
-            android:name="com.naohman.transsiberian.Translation.Activity.NewTermOrSet"
-            android:label="@string/title_activity_new_term_or_set" >
         </activity>
     </application>
 

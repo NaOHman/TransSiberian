@@ -8,6 +8,7 @@ import java.util.Locale;
 
 /**
  * Created by jeffrey on 1/19/15.
+ * a Singleton wrapper for Text to speech which streamlines loading
  */
 public class MyTTS implements  TextToSpeech.OnInitListener{
     private TextToSpeech tts;
@@ -18,8 +19,9 @@ public class MyTTS implements  TextToSpeech.OnInitListener{
         tts = new TextToSpeech(c, this);
     }
 
-    /*
+    /**
      * Potentially costly, avoid running on UI thread
+     * @param appCtx the application context
      */
     public static MyTTS getInstance(Context appCtx){
         if (instance == null)
@@ -30,8 +32,9 @@ public class MyTTS implements  TextToSpeech.OnInitListener{
         return instance;
     }
 
-    /*
-     * Returns true if TTS is available, false if it is not
+    /**
+     * @param word the word to say
+     * @return true if TTS is available, false if it is not
      */
     public boolean say(String word){
         if(isTts){
@@ -41,6 +44,10 @@ public class MyTTS implements  TextToSpeech.OnInitListener{
         return false;
     }
 
+    /**
+     * Load russian language when tts is initialized
+     * @param status the initialization status code
+     */
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {

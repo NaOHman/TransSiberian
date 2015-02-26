@@ -9,7 +9,6 @@ import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.LeadingMarginSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -23,6 +22,7 @@ import java.util.List;
  * Created by jeffrey on 1/16/15.
  */
 public class DictEntry implements Html.TagHandler {
+    //TODO make spans visually distinct
     private static final int DELTA = 35;
     private SpanListener listener;
     private List<String> definitions = new ArrayList<>();
@@ -34,59 +34,56 @@ public class DictEntry implements Html.TagHandler {
     public DictEntry(String s){
         s = s.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
         s = s.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-        /*
-        int maxLogSize = 1000;
-        for(int i = 0; i <= s.length() / maxLogSize; i++) {
-            int start = i * maxLogSize;
-            int end = (i+1) * maxLogSize;
-            end = end > s.length() ? s.length() : end;
-            Log.v("Raw", s.substring(start, end));
-        }
-        */
         DictHeading h = new DictHeading(s, 0);
         spannable = h.toSpan(0, this);
     }
 
     public DictEntry(){ }
 
+    /**
+     * set the listener for the various spans
+     * @param spanListener the listener
+     */
     public void setSpanListener(SpanListener spanListener){
         listener = spanListener;
     }
 
+    /**
+     * get all the definitions contained in this entry
+     * @return the list of definitions
+     */
     public String[] getDefinitions(){
         return definitions.toArray(new String[definitions.size()]);
     }
 
+    /**
+     * @return a spanned string representing this entry
+     */
     public Spanned getSpanned(){
         if (spannable == null)
             return new SpannedString("No Translations");
         return spannable;
     }
 
+    /**
+     * @return the keyword of this entry
+     */
     public String getKeyword(){
         return keyword;
     }
 
+    /**
+     * handle an html tag
+     * @param opening whether the tag is opening or closing
+     * @param tag the text of the tag
+     * @param output the String thus far
+     * @param xmlReader the XMLReader associated with this handler
+     */
     @Override
     public void handleTag(final boolean opening, final String tag,
                           Editable output, final XMLReader xmlReader){
         int l = output.length();
-        if (tag.equalsIgnoreCase("section")){
-            if (marker){
-                int where = getLast(output, LeadingMarginSpan.Standard.class);
-                output.setSpan(new LeadingMarginSpan.Standard(indentLevel, indentLevel),
-                        where, l, 0);
-                marker = false;
-            }
-            if (opening) {
-                indentLevel += DELTA;
-                marker = true;
-            } else {
-                marker = false;
-                indentLevel -= DELTA;
-            }
-            output.setSpan(new LeadingMarginSpan.Standard(0,0), l, l, Spannable.SPAN_MARK_MARK);
-        }
+        //When we come across opening flags set marker flags on the output
         if (opening){
            if (tag.equalsIgnoreCase("ex")){
                output.setSpan(new RelativeSizeSpan(0.8f),
@@ -98,6 +95,7 @@ public class DictEntry implements Html.TagHandler {
            } else if (tag.equalsIgnoreCase("dtrn")){
                output.setSpan(new DefinitionLink(""), l,l,Spannable.SPAN_MARK_MARK);
            }
+        //When we find closing tags, create the appropriate span from the marker to the current position
         } else {
            if (tag.equalsIgnoreCase("ex")){
                int where = getLast(output, RelativeSizeSpan.class);
@@ -120,8 +118,13 @@ public class DictEntry implements Html.TagHandler {
         }
     }
 
+    /**
+     * Pull the actual definition out of the text and wrap it with the right span
+     * @param text the output thus far
+     * @param start the start of corresponding tag
+     * @param end the end of the corresponding tag
+     */
     private void handleDefSpans(Editable text, int start, int end){
-        //TODO handle (ся) split around some parenthesis/abbreviations
         String full = text.toString();
         String target = full.substring(start, end);
         target = target.replaceAll("\\w+\\.","");
@@ -129,29 +132,38 @@ public class DictEntry implements Html.TagHandler {
         List<String> spans = new ArrayList<>();
         String def = "", span = "", paren = "";
         boolean open = false, center = false;
+        //Parcing Char by Char is the only reliable way to go
         for(int p=0; p<target.length(); p++){
             char c = target.charAt(p);
+            //if parenthesis are open
             if (open) {
+                //add char to the center section if needed to
                 if (center)
                     paren += c;
+                //if close parenthesis, close and break if at end
                 if (c == ')'){
                     open = false;
                     if (p+1 != target.length() && !isBreak(target.charAt(p+1))) {
                         span += paren;
                     }
                 }
+            //Parenthesis aren't open
             } else {
                if (c == '(') {
                    open = true;
+                   //Parenthesis are in the middle of the section, they could contain
+                   //a particle such as (ся)
                    if (!def.matches("\\s*")){
                        center = true;
                        paren = "(";
                    }
+                //if we reach a 'breaking character' set the span
                } else if (isBreak(c)) {
                    defs.add(def);
                    spans.add(span);
                    open = false; center = false;
                    def = ""; span = ""; paren = "";
+               //plain old chars
                } else {
                    def += c;
                    span += c;
@@ -174,10 +186,20 @@ public class DictEntry implements Html.TagHandler {
         }
     }
 
+    /**
+     * @param c a character
+     * @return whether the character would end a given section
+     */
     private boolean isBreak(char c){
         return (c == ',' || c == ';' || c == '-');
     }
 
+    /**
+     * Get the last flag of it's kind in the entry
+     * @param text the entry so far
+     * @param kind the class of the flag
+     * @return the position of the flag in the text
+     */
     private int getLast(Editable text, Class kind) {
         Object[] objs = text.getSpans(0, text.length(), kind);
         if(objs.length == 0) {
@@ -198,6 +220,9 @@ public class DictEntry implements Html.TagHandler {
         }
     }
 
+    /**
+     * a clickable span that holds a reference
+     */
     private class ReferenceLink extends ClickableSpan {
         private String link;
         public ReferenceLink(CharSequence link) {
@@ -209,6 +234,9 @@ public class DictEntry implements Html.TagHandler {
         }
     }
 
+    /**
+     * a Clickable span that holds a keyword
+     */
     private class KeywordSpan extends ClickableSpan {
         public  KeywordSpan(){}
         @Override
@@ -217,6 +245,9 @@ public class DictEntry implements Html.TagHandler {
         };
     }
 
+    /**
+     * a Clickable span that holds a definition
+     */
     private class DefinitionLink extends ClickableSpan {
         private String word;
         public DefinitionLink(String word) {

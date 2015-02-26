@@ -17,9 +17,10 @@ public class DictionaryDBHelper extends SQLiteAssetHelper {
     public static final String TABLE_ER = "er";
     private static final int DB_VERSION = 2;
 
-    /*
+    /**
      * Note this method may be very expensive if the database
      * does not already exist
+     * @param context the application context
      */
     public DictionaryDBHelper(Context context) {
         super(context, DB_NAME,getDir(context), null, DB_VERSION);

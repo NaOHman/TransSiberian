@@ -1,6 +1,9 @@
 package com.naohman.transsiberian.Translation.Activity;
 
+import android.app.AlertDialog;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,6 +32,11 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.naohman.language.transsiberian.R;
+import com.naohman.transsiberian.Quizlet.Quizlet;
+import com.naohman.transsiberian.Quizlet.QuizletSet;
+import com.naohman.transsiberian.Quizlet.SetFragment;
+import com.naohman.transsiberian.Quizlet.Term;
+import com.naohman.transsiberian.Quizlet.TermFragment;
 import com.naohman.transsiberian.SetUp.SetUpManager;
 import com.naohman.transsiberian.Translation.Util.MyTTS;
 
@@ -52,20 +60,24 @@ import org.json.JSONObject;
  * Shows the results of google image searches for the keyword
  */
 public class Definition extends ActionBarActivity implements View.OnClickListener,
-        ViewSwitcher.ViewFactory, View.OnTouchListener, AdapterView.OnItemClickListener {
+        ViewSwitcher.ViewFactory, View.OnTouchListener, AdapterView.OnItemClickListener,
+        TermFragment.NewTermListener, SetFragment.NewSetListener {
+    //TODO subtly display google logo
     public static final String QUERY_URL ="https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=%s&imgsz=medium";
     private List<Drawable> imgs = new ArrayList<>();
     private int position = -2, minSwipe;
     private ImageSwitcher switcher;
     private TextView no_images;
     private ProgressBar pb;
-    private String keyword;
+    private String keyword, definition;
     private ListView lv_definitions;
+    private QuizletSet mySet;
     float initialX;
+    private Quizlet quizlet;
     private static Animation lIn, lOut, rIn, rOut;
     private TextView tv_keyword;
+    private FragmentManager fm = getSupportFragmentManager();
 
-    //TODO make modular activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +97,13 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         makeAnimations();
         setMeanings();
         getImages(keyword);
+        quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet.open();
     }
 
+    /**
+     * Pull the keyword /meaning list from the intent and update the ui accordingly
+     */
     private void setMeanings(){
         Intent intent = getIntent();
         tv_keyword = (TextView) findViewById(R.id.definition);
@@ -99,6 +116,9 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         lv_definitions.setOnItemClickListener(this);
     }
 
+    /**
+     * load the animations used by the switcher
+     */
     private void makeAnimations(){
         lIn = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
         lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
@@ -106,8 +126,14 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
     }
 
+    /**
+     * When the keyword is clicked say the word
+     * todo tts icon?
+     * @param v the view containing the keyword
+     */
     @Override
     public void onClick(View v){
+        //Loading the TTS can take a while so it's loaded asynchronously
         new AsyncTask<String, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(String... params) {
@@ -124,6 +150,10 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         }.execute(keyword);
     }
 
+    /**
+     * a view factory for the image switcher
+     * @return a plain imageview
+     */
     @Override
     public View makeView() {
         ImageView myView = new ImageView(getApplicationContext());
@@ -134,6 +164,12 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         return myView;
     }
 
+    /**
+     * When the image switcher is dragged change the picture
+     * @param v the view being touched
+     * @param event the motion event
+     * @return whether the event was handled
+     */
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -147,9 +183,9 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         return true;
     }
 
-    /*
-     * change the image shown by the Image switcher, if next is true the image
-     * will come in from the left, otherwise it will come in from the left
+    /**
+     * change the image shown by the Image switcher,
+     * @param next whether to load the image from the left or the right
      */
     public void changeImage(boolean next){
         if (!imgs.isEmpty()) {
@@ -175,19 +211,17 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * pull a list of images of google image search
+     * @param keyword the images to search
+     */
     private void getImages(String keyword){
         ConnectivityManager cManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -200,15 +234,60 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         }
     }
 
+    /**
+     * When a meaning is clicked
+     * @param parent the listView
+     * @param view the child view
+     * @param position the position of the child in the list
+     * @param id the id of the child
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String word = (String) parent.getItemAtPosition(position);
-        Intent intent = new Intent(this, NewTermOrSet.class);
-        intent.putExtra("term", keyword);
-        intent.putExtra("definition", word);
-        startActivity(intent);
+        definition = (String) parent.getItemAtPosition(position);
+        final List<QuizletSet> sets = quizlet.getAllSets();
+        String[] titles = new String[sets.size()];
+        for (int i=0; i<sets.size(); i++)
+            titles[i] = sets.get(i).getTitle();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.create_term)
+                .setItems(titles, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mySet = sets.get(which);
+                        TermFragment termFragment  = TermFragment.newInstance(keyword, definition);
+                        termFragment.show(fm, "new term");
+                    }
+                })
+                .setPositiveButton(R.string.new_set, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        SetFragment setFragment = SetFragment.newInstance();
+                        setFragment.show(fm, "new set");
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null).show();
     }
 
+    @Override
+    public void addSet(String title, String description, String termLang, String defLang) {
+        mySet = quizlet.createSet(title, description, termLang, defLang);
+        TermFragment termFragment  = TermFragment.newInstance(keyword, definition);
+        termFragment.show(fm, "new term");
+    }
+
+
+    @Override
+    public void addTerm(String term, String definition) {
+        Log.d("Adding set", "here be dragons");
+        quizlet.createTerm(mySet.get_id(), term, definition);
+    }
+
+
+    /**
+     * a private class that fetches the google image results
+     */
     private class FetchImage extends AsyncTask<String, Drawable, Void> {
         @Override
         protected Void doInBackground(String... params) {
@@ -257,6 +336,9 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         }
     }
 
+    /**
+     * a private class for displaying meanings in a list view
+     */
     private class MeaningListAdapter extends ArrayAdapter<String> {
         public MeaningListAdapter(Context context, int resource, List<String> meanings) {
             super(context, resource, meanings);
@@ -273,4 +355,9 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
             return myView;
         }
     }
+
+    @Override
+    public void editSet(QuizletSet oldSet, String title, String description, String termLang, String defLang) {}
+    @Override
+    public void editTerm(Term oldTerm, String term, String definition) {}
 }

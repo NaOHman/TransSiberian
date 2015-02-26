@@ -14,15 +14,17 @@ import java.util.List;
 
 /**
  * Created by jeffrey on 1/21/15.
+ * a singleton wrapper for Russian Lucene morphology to streamline loading
  */
 public class RusMorph {
     private RussianLuceneMorphology morphology;
     private static RusMorph instance;
 
-    /*
+    /**
      * Creating Morphology objects is very expensive, do not do it
      * on the UI thread. Objects are saved in serialized form to
      * improve loading time
+     * @param appCtx the application context
      */
     private RusMorph(final Context appCtx){
         final File suspend_f = new File(appCtx.getFilesDir(), "rusMorph");
@@ -53,6 +55,11 @@ public class RusMorph {
         }
     }
 
+    /**
+     * Note this is potentially very costly, do not run on the UI thread
+     * @param appCtx the application context
+     * @return the Russian morphology
+     */
     public static RusMorph getInstance(final Context appCtx){
         if (instance == null)
             synchronized (RusMorph.class){
@@ -62,6 +69,10 @@ public class RusMorph {
         return instance;
     }
 
+    /**
+     * Serialize and save to file
+     * @param c the application context
+     */
     private void saveRusMorph(Context c){
         final File savedFile = new File(c.getFilesDir(), "rusMorph");
         FileOutputStream fos = null;
@@ -84,6 +95,10 @@ public class RusMorph {
         }
     }
 
+    /**
+     * @param keyword a declined word
+     * @return a list of the possible root words
+     */
     public List<String> getNormalForms(String keyword){
         return morphology.getNormalForms(keyword);
     }

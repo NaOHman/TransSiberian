@@ -14,14 +14,16 @@ import java.util.List;
 
 /**
  * Created by jeffrey on 1/21/15.
+ * a singleton wrapper of Enlish morphology to streamline loading
  */
 public class EngMorph {
     private EnglishLuceneMorphology morphology;
     private static EngMorph instance;
 
-    /*
+    /**
      * Note that construction a morphology is incredibly expensive.
      * The object is serialized in a file to save on loading time
+     * @param appCtx the application Context
      */
     private EngMorph(final Context appCtx){
         final File suspend_f = new File(appCtx.getFilesDir(), "rusMorph");
@@ -52,8 +54,9 @@ public class EngMorph {
         }
     }
 
-    /*
+    /**
      * Potentially very expensive, do not run on UI thread
+     * @param appCtx the application Context
      */
     public static EngMorph getInstance(final Context appCtx){
         if (instance == null)
@@ -64,6 +67,10 @@ public class EngMorph {
         return instance;
     }
 
+    /**
+     * serialize the morphology and save it to a file
+     * @param c the application context
+     */
     private void saveMorph(Context c){
         final File savedFile = new File(c.getFilesDir(), "engMorph");
         FileOutputStream fos = null;
@@ -86,6 +93,10 @@ public class EngMorph {
         }
     }
 
+    /**
+     * @param keyword a conjugated word
+     * @return the possible root words
+     */
     public List<String> getNormalForms(String keyword){
         return morphology.getNormalForms(keyword);
     }

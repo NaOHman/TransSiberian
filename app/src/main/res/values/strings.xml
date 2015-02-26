@@ -35,6 +35,7 @@
     <string name="continue_string">Continue</string>
     <string name="convert">Convert</string>
     <string name="create">Create</string>
+    <string name="create_term">Create term in set</string>
     <string name="definition">Definition</string>
     <string name="description">Description</string>
     <string name="delete_set">Delete Set</string>

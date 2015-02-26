@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,7 +78,7 @@ public class SetFragment extends DialogFragment implements View.OnClickListener,
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
         Bundle args = getArguments();
-        if (args != null) {
+        if (args != null && args.containsKey(OLD_SET)) {
             oldSet = (QuizletSet) args.getSerializable(OLD_SET);
             edit = true;
         } else {
@@ -86,12 +87,12 @@ public class SetFragment extends DialogFragment implements View.OnClickListener,
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity())
                 .setCancelable(false)
                 .setView(makeView())
-                .setNegativeButton(getString(R.string.cancel), null)
-                .setPositiveButton(getString(R.string.save), null);
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null);
         myDialog = dialog.show();
         myDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         focusKeyboard(titleET);
-        //Button's onClick must be overridden so that the dialog can stay open after the're pressed
+        //Button's onClick must be overridden so that the dialog can stay open after they're pressed
         myDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(this);
         return myDialog;
     }
@@ -111,11 +112,7 @@ public class SetFragment extends DialogFragment implements View.OnClickListener,
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_GO) {
-            if (edit)
-                myDialog.getButton(DialogInterface.BUTTON_POSITIVE).callOnClick();
-            else
-                myDialog.getButton(DialogInterface.BUTTON_NEUTRAL).callOnClick();
-            return true;
+            myDialog.getButton(DialogInterface.BUTTON_POSITIVE).callOnClick();
         }
         return false;
     }
@@ -153,6 +150,7 @@ public class SetFragment extends DialogFragment implements View.OnClickListener,
                     termLangBtn.setText(R.string.russian_terms);
                 return;
             default:  //click came from dialog button
+                Log.d("Registered default Click", "Onclick LIstener");
                 String title = titleET.getText().toString();
                 String description = descriptionET.getText().toString();
                 boolean valid = checkInput(title);
@@ -169,8 +167,10 @@ public class SetFragment extends DialogFragment implements View.OnClickListener,
                     defLang = Quizlet.ENGLISH;
                 dismiss();
                 if (edit) {
+                    Log.d("Registered default Click", "Edit");
                     setListener.editSet(oldSet, title, description, termLang, defLang);
                 } else {
+                    Log.d("Registered default Click", "Add");
                     setListener.addSet(title, description, termLang, defLang);
                 }
         }
