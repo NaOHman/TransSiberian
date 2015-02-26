@@ -41,7 +41,6 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
     private final static String CURRENCTY_URL = "http://www.freecurrencyconverterapi.com/api/v3/convert?q=USD_RUB";
     private float exchange;
     private static final int ANIM_DURATION = 500;
-    private RotateAnimation spin;
     private QuadraticAnimation toRight, toLeft;
     private ImageView swap;
     private boolean swapped = false;
@@ -66,9 +65,6 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         getExchange();
 
         //Set up Animations
-        spin = new RotateAnimation(0, 180,
-                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        spin.setDuration(ANIM_DURATION);
         toRight = new QuadraticAnimation();
         toRight.setDuration(ANIM_DURATION);
         toRight.setFillAfter(true);
@@ -129,7 +125,6 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         toLeft.setPath(animDistance, animHeight, swapped);
         foreign.startAnimation(toRight);
         ruble.startAnimation(toLeft);
-        swap.startAnimation(spin);
         swapped = !swapped;
         convert(null);
     }
