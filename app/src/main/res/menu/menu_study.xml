@@ -1,21 +1,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.naohman.transsiberian.Study.Study">
+    tools:context="com.naohman.transsiberian.study.Study">
     <item android:id="@+id/action_lang"
-        android:title="language"
+        android:title="@string/language"
         android:icon="@drawable/my_r"
         app:showAsAction="ifRoom"
         android:orderInCategory="0"
         />
     <item android:id="@+id/action_restart"
-        android:title="Edit"
+        android:title="@string/restart"
         android:icon="@drawable/ic_action_refresh"
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
         />
     <item android:id="@+id/action_edit"
-        android:title="Edit"
+        android:title="@string/edit_set"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_action_edit"
         android:orderInCategory="2"

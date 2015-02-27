@@ -6,6 +6,6 @@
     android:layout_height="wrap_content"
     android:minHeight="@dimen/clickable_height"
     android:gravity="start"
-    android:textSize="@dimen/subheading"
+    android:textSize="@dimen/text"
     android:linksClickable="true"
     />

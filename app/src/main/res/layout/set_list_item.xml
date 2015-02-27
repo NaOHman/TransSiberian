@@ -34,6 +34,7 @@
         android:layout_height="match_parent"
         android:layout_weight="2"
         android:scaleType="center"
+        android:contentDescription="@string/remove"
         android:background="@android:color/transparent"
         />
 </LinearLayout>

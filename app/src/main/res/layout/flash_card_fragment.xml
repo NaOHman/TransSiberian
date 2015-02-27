@@ -15,6 +15,7 @@
         android:layout_centerVertical="true"
         android:padding="@dimen/activity_horizontal_margin"
         android:alpha="0"
+        android:contentDescription="@string/correct"
         android:src="@drawable/ic_action_accept"
         />
     <ImageView
@@ -25,6 +26,7 @@
         android:layout_alignParentRight="true"
         android:padding="@dimen/activity_horizontal_margin"
         android:alpha="0"
+        android:contentDescription="@string/incorrect"
         android:src="@drawable/ic_action_remove"
         />
 </RelativeLayout>

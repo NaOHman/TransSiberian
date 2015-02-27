@@ -38,6 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/term_lang_btn"
             android:layout_width="0dp"
             android:layout_height="fill_parent"
@@ -46,6 +47,7 @@
             android:background="@color/hi_bg_1"
             />
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/def_lang_btn"
             android:layout_width="0dp"
             android:layout_height="fill_parent"

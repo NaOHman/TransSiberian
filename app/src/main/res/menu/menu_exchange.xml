@@ -1,9 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.naohman.transsiberian.Exchange.Exchange">
+    tools:context="com.naohman.transsiberian.exchange.Exchange">
     <item android:id="@+id/currency"
-        android:title="Change Currency"
+        android:title="@string/change_currency"
         android:icon="@drawable/dollar"
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
