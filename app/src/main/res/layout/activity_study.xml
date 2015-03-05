@@ -47,6 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:padding="15dp"
+            android:visibility="gone"
             android:alpha="0"
             android:contentDescription="@string/correct"
             android:src="@drawable/ic_action_accept"
@@ -58,9 +59,10 @@
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:padding="15dp"
+            android:visibility="gone"
             android:alpha="0"
             android:contentDescription="@string/incorrect"
-            android:src="@drawable/ic_action_remove"
+            android:src="@drawable/ic_action_wrong"
             />
     </RelativeLayout>
 </LinearLayout>

@@ -55,12 +55,10 @@ public class FlashCardManager {
 
     /**
      * turn the current flashcard into a view
-     * @param front whether we want the front or back
      * @param activity the activity for this session, it must implement OnTouchListener
      * @return the current flashcard view
      */
-    private View getView(boolean front, Activity activity){
-        this.frontVisible = front;
+    public View getView(Activity activity){
         LayoutInflater inflater = activity.getLayoutInflater();
         TextView v;
         if (frontVisible) {
@@ -79,22 +77,13 @@ public class FlashCardManager {
     }
 
     /**
-     * public method for getting the current view
-     * @param activity the activity for this session, it must implement OnTouchListener
-     * @return the resulting view
-     */
-    public View getView(Activity activity ){
-        return getView(frontFirst, activity);
-    }
-
-    /**
      * Flips the card over and produces a new view
      * @param activity the activity for this session, it must implement OnTouchListener
      * @return the resulting view
      */
     public View flipView(Activity activity){
         frontVisible = !frontVisible;
-        return getView(frontVisible, activity);
+        return getView(activity);
     }
 
     /**
@@ -152,6 +141,7 @@ public class FlashCardManager {
             roundComplete = true;
         else
             current = active.pop();
+        frontVisible = frontFirst;
     }
 
     /**

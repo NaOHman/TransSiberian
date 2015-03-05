@@ -40,17 +40,16 @@
             android:text="@string/continue_string"
             android:textColor="@color/hi_fg_1"
             android:background="@color/hi_bg_1"
-            android:onClick="nextRound"
             />
         <Button
             style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/restart"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/hi_fg_2"
             android:background="@color/hi_bg_2"
             android:text="@string/restart"
-            android:onClick="restart"
             />
         </LinearLayout>
 </LinearLayout>

@@ -5,7 +5,7 @@
 
     <dimen name="text">20sp</dimen>
     <dimen name="subheading">24sp</dimen>
-    <dimen name="heading">3sdp</dimen>
+    <dimen name="heading">32dp</dimen>
     <dimen name="title">45sp</dimen>
 
     <dimen name="clickable_height">45dp</dimen>
