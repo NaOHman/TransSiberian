@@ -24,14 +24,13 @@ import com.naohman.transsiberian.quizlet.Term;
 import java.util.List;
 
 public class Study extends ActionBarActivity implements View.OnTouchListener {
-    //TODo move from location with appropriate time,
+    private static long fast = 300, slow = 800, out = 500;
     private TextView set_title, set_description;
     private AnimatorSet flipOut, flipIn;
     private Menu menu;
     private float startingX, initialX, initialY, minSwipe;
     private RelativeLayout holder;
     private ImageView correct, incorrect;
-    private static long fast = 300, slow = 600;
     private QuizletSet mySet;
     private FlashCardManager mgr;
     private static Animation downIn, lOut, rOut;
@@ -61,15 +60,9 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
         });
         lOut = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
         rOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
-//        lOut.setAnimationListener(this);
-//        rOut.setAnimationListener(this);
         downIn = AnimationUtils.loadAnimation(this, R.anim.slide_down_in);
         flipOut = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_out);
         flipIn = (AnimatorSet) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flip_left_in);
-//        for (Animator child : flipOut.getChildAnimations())
-//            child.addListener(this);
-//        for (Animator child : flipIn.getChildAnimations())
-//            child.addListener(this);
     }
 
     @Override
@@ -172,14 +165,14 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
         cAnim = correct.animate().
                 alpha(targetAlpha).
                 setDuration((long) (cDur * Math.abs(correct.getAlpha() - targetAlpha))).
-                setStartDelay(100);
+                setStartDelay(targetAlpha == 0.5f ? 100 : 0);
         if (iAnim != null)
             iAnim.cancel();
         incorrect.setVisibility(View.VISIBLE);
         iAnim = incorrect.animate().
                 alpha(targetAlpha).
                 setDuration((long) (iDur * Math.abs(incorrect.getAlpha() - targetAlpha))).
-                setStartDelay(100);
+                setStartDelay(targetAlpha == 0.5f ? 100 : 0);
     }
 
     /**
@@ -201,11 +194,15 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
      * @param dx the direction the view was moved
      */
     public void swipeOut(View view, float dx){
+        float total = view.getWidth() + startingX - minSwipe;
+        long dur = (long) (out * ((total - (Math.abs(dx) - minSwipe))/total));
         if (dx < 0) {
+            rOut.setDuration(dur);
             view.startAnimation(rOut);
             fade(slow, fast, 0f);
             mgr.next();
         } else {
+            lOut.setDuration(dur);
             view.startAnimation(lOut);
             fade(fast, slow, 0f);
             mgr.save();
