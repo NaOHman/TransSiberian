@@ -73,8 +73,9 @@ public class DictHeading {
      * @return the spanned text
      */
     public SpannableStringBuilder toSpan(int indent, Html.TagHandler handler){
-        Log.d("heading text", contents);
-        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("<html><body>"+contents+"</body></html>",null, handler);
+        //We need to trick the HTML parser into thinking we're actually parsing HTML
+        SpannableStringBuilder s = (SpannableStringBuilder)
+                Html.fromHtml("<html><body>"+contents+"</body></html>",null, handler);
         s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
         if (subHeadings != null) {
             for (DictHeading heading : subHeadings) {

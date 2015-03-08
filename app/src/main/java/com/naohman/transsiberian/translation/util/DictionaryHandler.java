@@ -21,19 +21,18 @@ public class DictionaryHandler {
     private static final String[] TRANSLATION_COLS = {"keyword", "definition"};
 
 
-    private DictionaryHandler(Context ctx) {
-        dbHelper = new DictionaryDBHelper(ctx);
+    private DictionaryHandler() {
+        dbHelper = new DictionaryDBHelper();
     }
 
     /**
      * Potentially very costly, do not run on UI thread
-     * @param appCtx the application context
      */
-    public static DictionaryHandler getInstance(Context appCtx){
+    public static DictionaryHandler getInstance(){
         if (instance == null)
             synchronized (DictionaryHandler.class){
                 if (instance == null)
-                    instance = new DictionaryHandler(appCtx);
+                    instance = new DictionaryHandler();
             }
         return instance;
     }
@@ -61,10 +60,9 @@ public class DictionaryHandler {
      * Note that this is an expensive call and could possibly trigger other
      * expensive operations
      * @param keyword the keyword to search
-     * @param appCtx the application context
      * @return a list of Dictionary Entries representing the translations
      */
-    public List<DictEntry> getTranslations(String keyword, Context appCtx) {
+    public List<DictEntry> getTranslations(String keyword) {
         keyword = keyword.toLowerCase();
         Cursor cursor = queryKeyword(keyword);
         List<DictEntry> entries = new ArrayList<>();
@@ -72,7 +70,7 @@ public class DictionaryHandler {
         //No entries found, damage control time
         if (cursor.getCount() == 0) {
             //Try to find the root word of the query
-            List<String> morphs = getDictionaryForms(keyword, appCtx);
+            List<String> morphs = getDictionaryForms(keyword);
             //No roots were found, try splitting the phrase
             if (morphs == null || morphs.size() == 0){
                 Log.d("No Morphs", keyword);
@@ -82,7 +80,7 @@ public class DictionaryHandler {
                     Log.d("Multiple words", ""+ words.length);
                     //Query each word and add them to the list of return values
                     for (String word : words){
-                        List<DictEntry> entryList = getTranslations(word, appCtx);
+                        List<DictEntry> entryList = getTranslations(word);
                         Log.d("Looking for", word);
                         if (entryList != null && entryList.size() > 0)
                             entries.addAll(entryList);
@@ -108,20 +106,19 @@ public class DictionaryHandler {
 
     /**
      * @param keyword the search query
-     * @param appCtx the application context
      * @return the possible root words of the keyword
      */
-    private static List<String> getDictionaryForms(String keyword, Context appCtx) {
+    private static List<String> getDictionaryForms(String keyword) {
         keyword = keyword.replaceAll("to\\s", "");
         keyword = keyword.replaceAll("[^A-Za-zА-Яа-я ]", "");
         List<String> baseforms = new ArrayList<>();
-        for (String info : RusMorph.getInstance(appCtx).getMorphInfo(keyword))
+        for (String info : RusMorph.getInstance().getMorphInfo(keyword))
             Log.d("Morph Info", info);
         try {
             if (isRussian(keyword)) {
-                baseforms.addAll(RusMorph.getInstance(appCtx).getNormalForms(keyword));
+                baseforms.addAll(RusMorph.getInstance().getNormalForms(keyword));
             } else if (isEnglish(keyword)) {
-                baseforms.addAll(EngMorph.getInstance(appCtx).getNormalForms(keyword));
+                baseforms.addAll(EngMorph.getInstance().getNormalForms(keyword));
             }
             return baseforms;
         } catch (Exception e){

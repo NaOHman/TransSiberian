@@ -70,7 +70,7 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
         super.onResume();
         if (mySet == null)
             bail();
-        Quizlet quizlet = Quizlet.getInstance(getApplicationContext());
+        Quizlet quizlet = Quizlet.getInstance();
         quizlet.open();
         List<Term> terms = quizlet.getSetTerms(mySet.get_id());
         if (terms.isEmpty())

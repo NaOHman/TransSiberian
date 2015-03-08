@@ -39,7 +39,7 @@ public class SetListActivity extends ActionBarActivity implements SetFragment.Ne
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_list);
         sets = (ListView) findViewById(R.id.set_listview);
-        quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet = Quizlet.getInstance();
         quizlet.open();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }

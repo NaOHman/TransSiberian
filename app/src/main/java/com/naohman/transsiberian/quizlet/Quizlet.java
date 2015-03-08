@@ -27,13 +27,13 @@ public class Quizlet {
     private SQLiteDatabase db;
     private SQLiteOpenHelper dbHelper;
 
-    private Quizlet(Context appCtx){
-        dbHelper = new QuizletDBHelper(appCtx);
+    private Quizlet(){
+        dbHelper = new QuizletDBHelper();
     }
 
-    public static Quizlet getInstance(Context appCtx){
+    public static Quizlet getInstance(){
         if (instance == null)
-            instance = new Quizlet(appCtx);
+            instance = new Quizlet();
         return instance;
     }
 

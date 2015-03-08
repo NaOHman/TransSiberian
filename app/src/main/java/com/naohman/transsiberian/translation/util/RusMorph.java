@@ -2,6 +2,9 @@ package com.naohman.transsiberian.translation.util;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.naohman.transsiberian.setUp.App;
+
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,10 +25,9 @@ public class RusMorph {
      * Creating Morphology objects is very expensive, do not do it
      * on the UI thread. Objects are saved in serialized form to
      * improve loading time
-     * @param appCtx the application context
      */
-    private RusMorph(final Context appCtx){
-        final File suspend_f = new File(appCtx.getFilesDir(), "rusMorph");
+    private RusMorph(){
+        final File suspend_f = new File(App.context().getFilesDir(), "rusMorph");
         if (suspend_f.exists()) {
             FileInputStream fis = null;
             ObjectInputStream is = null;
@@ -46,7 +48,7 @@ public class RusMorph {
         } else {
             try {
                 morphology = new RussianLuceneMorphology();
-                saveRusMorph(appCtx);
+                saveRusMorph();
             } catch (Exception e) {
                 Log.e("Problem creating Morphology", e.getMessage());
             }
@@ -55,24 +57,22 @@ public class RusMorph {
 
     /**
      * Note this is potentially very costly, do not run on the UI thread
-     * @param appCtx the application context
      * @return the Russian morphology
      */
-    public static RusMorph getInstance(final Context appCtx){
+    public static RusMorph getInstance(){
         if (instance == null)
             synchronized (RusMorph.class){
                 if (instance == null)
-                    instance = new RusMorph(appCtx);
+                    instance = new RusMorph();
             }
         return instance;
     }
 
     /**
      * Serialize and save to file
-     * @param c the application context
      */
-    private void saveRusMorph(Context c){
-        final File savedFile = new File(c.getFilesDir(), "rusMorph");
+    private void saveRusMorph(){
+        final File savedFile = new File(App.context().getFilesDir(), "rusMorph");
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         boolean keep = true;

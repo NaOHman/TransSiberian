@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.naohman.transsiberian.setUp.App;
+
 /**
  * Created by jeffrey on 1/26/15.
  * Handles interactions with the Quizlet database
@@ -40,8 +42,8 @@ public class QuizletDBHelper extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 2;
 
-    public QuizletDBHelper(Context context){
-        super(context, DB_NAME, null, DB_VERSION);
+    public QuizletDBHelper(){
+        super(App.context(), DB_NAME, null, DB_VERSION);
     }
 
     @Override

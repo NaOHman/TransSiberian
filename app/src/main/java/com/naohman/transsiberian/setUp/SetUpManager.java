@@ -47,65 +47,60 @@ public class SetUpManager {
 
     /**
      * Asynchronously create a Russian Lucene Morphology
-     * @param appCtx the Application context
      */
-    public void loadRusMorphology(final Context appCtx){
+    public void loadRusMorphology(){
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                RusMorph.getInstance(appCtx);
+                RusMorph.getInstance();
             }
         });
     }
 
     /**
      * Asynchronously create an English Lucene Morphology
-     * @param appCtx the Application context
      */
-    public void loadEngMorphology(final Context appCtx){
+    public void loadEngMorphology(){
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                EngMorph.getInstance(appCtx);
+                EngMorph.getInstance();
             }
         });
     }
 
     /**
      * Asynchronously create a TextToSpeech handler
-     * @param appCtx the Application context
      */
-    public void loadTTS(final Context appCtx){
+    public void loadTTS(){
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                MyTTS.getInstance(appCtx);
+                MyTTS.getInstance();
             }
         });
     }
 
     /**
      * asynchronously load the translation dictionary
-     * @param appCtx the Application context
      */
-    public void loadDictionary(final Context appCtx){
+    public void loadDictionary(){
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                DictionaryHandler.getInstance(appCtx);
+                DictionaryHandler.getInstance();
             }
         });
     }
 
     /**
      * asynchronously load the Quizlet database
-     * @param appCtx the Application context
      */
-    public void loadQuizlet(final Context appCtx){
+    public void loadQuizlet(){
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Quizlet.getInstance(appCtx);
+                Quizlet.getInstance();
             }
         });
     }

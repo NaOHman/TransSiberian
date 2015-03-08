@@ -3,6 +3,8 @@ package com.naohman.transsiberian.translation.util;
 import android.content.Context;
 import android.util.Log;
 
+import com.naohman.transsiberian.setUp.App;
+
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 
 import java.io.File;
@@ -23,10 +25,9 @@ public class EngMorph {
     /**
      * Note that construction a morphology is incredibly expensive.
      * The object is serialized in a file to save on loading time
-     * @param appCtx the application Context
      */
-    private EngMorph(final Context appCtx){
-        final File suspend_f = new File(appCtx.getFilesDir(), "rusMorph");
+    private EngMorph(){
+        final File suspend_f = new File(App.context().getFilesDir(), "rusMorph");
         if (suspend_f.exists()) {
             FileInputStream fis = null;
             ObjectInputStream is = null;
@@ -47,7 +48,7 @@ public class EngMorph {
         } else {
             try {
                 morphology = new EnglishLuceneMorphology();
-                saveMorph(appCtx);
+                saveMorph();
             } catch (Exception e) {
                 Log.e("Problem creating Morphology", e.getMessage());
             }
@@ -56,23 +57,21 @@ public class EngMorph {
 
     /**
      * Potentially very expensive, do not run on UI thread
-     * @param appCtx the application Context
      */
-    public static EngMorph getInstance(final Context appCtx){
+    public static EngMorph getInstance(){
         if (instance == null)
             synchronized (EngMorph.class){
                 if (instance == null)
-                    instance = new EngMorph(appCtx);
+                    instance = new EngMorph();
             }
         return instance;
     }
 
     /**
      * serialize the morphology and save it to a file
-     * @param c the application context
      */
-    private void saveMorph(Context c){
-        final File savedFile = new File(c.getFilesDir(), "engMorph");
+    private void saveMorph(){
+        final File savedFile = new File(App.context().getFilesDir(), "engMorph");
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         boolean keep = true;

@@ -52,7 +52,7 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
         description_tv = (TextView) findViewById(R.id.set_description);
         description_tv.setText(mySet.getDescription());
         term_view = (ListView) findViewById(R.id.term_lv);
-        quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet = Quizlet.getInstance();
         findViewById(R.id.title_box).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

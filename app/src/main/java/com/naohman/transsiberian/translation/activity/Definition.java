@@ -84,7 +84,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_definition);
         SetUpManager sMgr = new SetUpManager();
-        sMgr.loadTTS(getApplicationContext());
+        sMgr.loadTTS();
         pb = (ProgressBar) findViewById(R.id.switcher_loading);
         pb.setVisibility(View.VISIBLE);
         no_images = (TextView) findViewById(R.id.no_images);
@@ -97,7 +97,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         makeAnimations();
         setMeanings();
         getImages(keyword);
-        quizlet = Quizlet.getInstance(getApplicationContext());
+        quizlet = Quizlet.getInstance();
         quizlet.open();
     }
 
@@ -137,7 +137,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         new AsyncTask<String, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(String... params) {
-                return MyTTS.getInstance(getApplicationContext()).say(params[0]);
+                return MyTTS.getInstance().say(params[0]);
             }
             @Override
             protected void onPostExecute(Boolean success) {

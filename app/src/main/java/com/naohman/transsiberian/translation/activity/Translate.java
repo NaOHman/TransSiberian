@@ -51,10 +51,10 @@ public class Translate extends ActionBarActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_translate);
         SetUpManager sMgr = new SetUpManager();
-        sMgr.loadDictionary(getApplicationContext());
-        sMgr.loadRusMorphology(getApplicationContext());
-        sMgr.loadEngMorphology(getApplicationContext());
-        sMgr.loadTTS(getApplicationContext());
+        sMgr.loadDictionary();
+        sMgr.loadRusMorphology();
+        sMgr.loadEngMorphology();
+        sMgr.loadTTS();
         pb_loading = (ProgressBar) findViewById(R.id.translations_loading);
         pb_loading.setVisibility(View.INVISIBLE);
         et_keyword = (EditText) findViewById(R.id.et_keyword);
@@ -98,9 +98,9 @@ public class Translate extends ActionBarActivity implements
             @Override
             protected List<DictEntry> doInBackground(String... params) {
                 List<DictEntry> entries;
-                DictionaryHandler dictionary = DictionaryHandler.getInstance(getApplicationContext());
+                DictionaryHandler dictionary = DictionaryHandler.getInstance();
                 dictionary.open();
-                entries = dictionary.getTranslations(params[0], getApplicationContext());
+                entries = dictionary.getTranslations(params[0]);
                 for (DictEntry entry: entries){
                     entry.setSpanListener(Translate.this);
                 }

@@ -1,18 +1,20 @@
 package com.naohman.transsiberian.translation.util;
 
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.Spanned;
 import android.text.SpannedString;
+import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
+
+import com.naohman.language.transsiberian.R;
 
 import org.xml.sax.XMLReader;
 import java.util.ArrayList;
@@ -88,23 +90,22 @@ public class DictEntry implements Html.TagHandler {
                output.setSpan(new RelativeSizeSpan(0.8f),
                        output.length(), output.length(), Spannable.SPAN_MARK_MARK);
            } else if (tag.equalsIgnoreCase("kref")){
-               output.setSpan(new ReferenceLink(""),l,l, Spannable.SPAN_MARK_MARK);
+               output.setSpan(new ReferenceSpan(""),l,l, Spannable.SPAN_MARK_MARK);
            } else if (tag.equalsIgnoreCase("k")){
                output.setSpan(new KeywordSpan(),l,l,Spannable.SPAN_MARK_MARK);
            } else if (tag.equalsIgnoreCase("dtrn")){
-               output.setSpan(new DefinitionLink(""), l,l,Spannable.SPAN_MARK_MARK);
+               output.setSpan(new DefinitionSpan(""), l,l,Spannable.SPAN_MARK_MARK);
            }
         //When we find closing tags, create the appropriate span from the marker to the current position
         } else {
            if (tag.equalsIgnoreCase("ex")){
                int where = getLast(output, RelativeSizeSpan.class);
-               //todo use color resources
-               output.setSpan(new ForegroundColorSpan(Color.parseColor("#aaaaaa")),
+               output.setSpan(new ForegroundColorSpan(R.color.ex_color),
                        where, l, 0);
                output.setSpan(new RelativeSizeSpan(0.8f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
            } else if (tag.equalsIgnoreCase("kref")){
-               int where = getLast(output, ReferenceLink.class);
-               output.setSpan(new ReferenceLink(output.subSequence(where, l)), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+               int where = getLast(output, ReferenceSpan.class);
+               output.setSpan(new ReferenceSpan(output.subSequence(where, l)), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
            } else if (tag.equalsIgnoreCase("k")){
                int where = getLast(output, KeywordSpan.class);
                Log.d("Found Closing tag at", "" + l);
@@ -113,7 +114,7 @@ public class DictEntry implements Html.TagHandler {
                output.setSpan(new RelativeSizeSpan(1.25f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                keyword = output.subSequence(where, l).toString();
            } else if (tag.equalsIgnoreCase("dtrn")){
-               int where = getLast(output, DefinitionLink.class);
+               int where = getLast(output, DefinitionSpan.class);
                handleDefSpans(output, where, l);
            }
         }
@@ -182,7 +183,7 @@ public class DictEntry implements Html.TagHandler {
                 definitions.add(def);
                 int s = full.indexOf(span, start);
                 if (s> 0)
-                    text.setSpan(new DefinitionLink(def),s, s+span.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    text.setSpan(new DefinitionSpan(def),s, s+span.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
     }
@@ -224,14 +225,20 @@ public class DictEntry implements Html.TagHandler {
     /**
      * a clickable span that holds a reference
      */
-    private class ReferenceLink extends ClickableSpan {
+    private class ReferenceSpan extends ClickableSpan {
         private String link;
-        public ReferenceLink(CharSequence link) {
+        public ReferenceSpan(CharSequence link) {
             this.link = link.toString();
         }
         @Override
         public void onClick(View widget) {
             listener.onReferenceClick(widget, DictEntry.this, link);
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds) {
+            super.updateDrawState(ds);
+            ds.setColor(R.color.reference_color);
         }
     }
 
@@ -239,25 +246,40 @@ public class DictEntry implements Html.TagHandler {
      * a Clickable span that holds a keyword
      */
     private class KeywordSpan extends ClickableSpan {
-        public  KeywordSpan(){}
+
+        public KeywordSpan() {}
+
         @Override
-        public void onClick(View view){
+        public void onClick(View view) {
             listener.onKeywordClick(view, DictEntry.this);
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds) {
+            super.updateDrawState(ds);
+            ds.setColor(R.color.keyword_color);
         }
     }
 
     /**
      * a Clickable span that holds a definition
      */
-    private class DefinitionLink extends ClickableSpan {
+    private class DefinitionSpan extends ClickableSpan {
         private String word;
-        public DefinitionLink(String word) {
+
+        public DefinitionSpan(String word) {
             this.word = word.replaceAll("\\(([^\\)]+)\\)", "");
         }
+
         @Override
         public void onClick(View widget) {
             listener.onDefinitionClick(widget, DictEntry.this, word);
         }
 
+        @Override
+        public void updateDrawState(TextPaint ds) {
+            super.updateDrawState(ds);
+            ds.setColor(R.color.definition_color);
+        }
     }
 }

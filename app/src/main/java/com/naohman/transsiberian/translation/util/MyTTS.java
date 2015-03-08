@@ -4,6 +4,8 @@ import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import com.naohman.transsiberian.setUp.App;
+
 import java.util.Locale;
 
 /**
@@ -15,19 +17,18 @@ public class MyTTS implements  TextToSpeech.OnInitListener{
     private boolean isTts;
     private static MyTTS instance;
 
-    private MyTTS(Context c) {
-        tts = new TextToSpeech(c, this);
+    private MyTTS() {
+        tts = new TextToSpeech(App.context(), this);
     }
 
     /**
      * Potentially costly, avoid running on UI thread
-     * @param appCtx the application context
      */
-    public static MyTTS getInstance(Context appCtx){
+    public static MyTTS getInstance(){
         if (instance == null)
             synchronized (MyTTS.class){
                 if (instance == null)
-                    instance = new MyTTS(appCtx);
+                    instance = new MyTTS();
             }
         return instance;
     }

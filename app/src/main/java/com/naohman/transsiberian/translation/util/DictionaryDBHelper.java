@@ -1,6 +1,7 @@
 package com.naohman.transsiberian.translation.util;
 import android.content.Context;
 
+import com.naohman.transsiberian.setUp.App;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 import java.io.File;
@@ -20,10 +21,9 @@ public class DictionaryDBHelper extends SQLiteAssetHelper {
     /**
      * Note this method may be very expensive if the database
      * does not already exist
-     * @param context the application context
      */
-    public DictionaryDBHelper(Context context) {
-        super(context, DB_NAME,getDir(context), null, DB_VERSION);
+    public DictionaryDBHelper() {
+        super(App.context(), DB_NAME,getDir(App.context()), null, DB_VERSION);
         setForcedUpgrade();
     }
 

@@ -7,4 +7,8 @@
     <color name="hi_fg_2">#ffffff</color>
     <color name="hi_bg_3">#ffffff</color>
     <color name="hi_fg_3">#000000</color>
+    <color name="ex_color">#acacac</color>
+    <color name="reference_color">#00004b</color>
+    <color name="keyword_color">#4b0000</color>
+    <color name="definition_color">#004b00</color>
 </resources>
