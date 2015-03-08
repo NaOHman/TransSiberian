@@ -3,6 +3,7 @@ package com.naohman.transsiberian.translation.util;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.style.LeadingMarginSpan;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,8 @@ public class DictHeading {
      * @return the spanned text
      */
     public SpannableStringBuilder toSpan(int indent, Html.TagHandler handler){
-        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("\u200B"+contents,null, handler);
+        Log.d("heading text", contents);
+        SpannableStringBuilder s = (SpannableStringBuilder) Html.fromHtml("<html><body>"+contents+"</body></html>",null, handler);
         s.setSpan(new LeadingMarginSpan.Standard(indent,indent), 0, s.length(), 0);
         if (subHeadings != null) {
             for (DictHeading heading : subHeadings) {

@@ -115,6 +115,8 @@ public class DictionaryHandler {
         keyword = keyword.replaceAll("to\\s", "");
         keyword = keyword.replaceAll("[^A-Za-zА-Яа-я ]", "");
         List<String> baseforms = new ArrayList<>();
+        for (String info : RusMorph.getInstance(appCtx).getMorphInfo(keyword))
+            Log.d("Morph Info", info);
         try {
             if (isRussian(keyword)) {
                 baseforms.addAll(RusMorph.getInstance(appCtx).getNormalForms(keyword));
@@ -129,7 +131,7 @@ public class DictionaryHandler {
 
     /**
      * @param keyword a search query
-     * @returns a cursor representing a database search for that keyword
+     * @return a cursor representing a database search for that keyword
      */
     private Cursor queryKeyword(String keyword) {
         String[] whereArgs = {keyword};
@@ -149,7 +151,7 @@ public class DictionaryHandler {
     /**
      * @param c a cursor into the database
      * @param col the column we want to return
-     * @returns all the entries in a column that a cursor points to
+     * @return all the entries in a column that a cursor points to
      */
     private static List<String> getColumns(Cursor c, int col) {
         List<String> entries = new ArrayList<>();

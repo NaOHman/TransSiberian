@@ -24,13 +24,10 @@ import java.util.List;
  */
 public class DictEntry implements Html.TagHandler {
     //TODO make spans visually distinct
-    private static final int DELTA = 35;
     private SpanListener listener;
     private List<String> definitions = new ArrayList<>();
     private String keyword;
-    private int indentLevel = -DELTA;
     private Spanned spannable;
-    private boolean marker = false;
 
     public DictEntry(String s){
         s = s.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
@@ -84,6 +81,7 @@ public class DictEntry implements Html.TagHandler {
     public void handleTag(final boolean opening, final String tag,
                           Editable output, final XMLReader xmlReader){
         int l = output.length();
+        Log.d("Found tag", tag + " at  " + l);
         //When we come across opening flags set marker flags on the output
         if (opening){
            if (tag.equalsIgnoreCase("ex")){
@@ -92,7 +90,7 @@ public class DictEntry implements Html.TagHandler {
            } else if (tag.equalsIgnoreCase("kref")){
                output.setSpan(new ReferenceLink(""),l,l, Spannable.SPAN_MARK_MARK);
            } else if (tag.equalsIgnoreCase("k")){
-               output.setSpan(new StyleSpan(Typeface.BOLD),l,l,Spannable.SPAN_MARK_MARK);
+               output.setSpan(new KeywordSpan(),l,l,Spannable.SPAN_MARK_MARK);
            } else if (tag.equalsIgnoreCase("dtrn")){
                output.setSpan(new DefinitionLink(""), l,l,Spannable.SPAN_MARK_MARK);
            }
@@ -100,17 +98,19 @@ public class DictEntry implements Html.TagHandler {
         } else {
            if (tag.equalsIgnoreCase("ex")){
                int where = getLast(output, RelativeSizeSpan.class);
+               //todo use color resources
                output.setSpan(new ForegroundColorSpan(Color.parseColor("#aaaaaa")),
                        where, l, 0);
-               output.setSpan(new RelativeSizeSpan(0.8f), where, l, 0);
+               output.setSpan(new RelativeSizeSpan(0.8f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
            } else if (tag.equalsIgnoreCase("kref")){
                int where = getLast(output, ReferenceLink.class);
-               output.setSpan(new ReferenceLink(output.subSequence(where, l)), where, l, 0);
+               output.setSpan(new ReferenceLink(output.subSequence(where, l)), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
            } else if (tag.equalsIgnoreCase("k")){
-               int where = getLast(output, StyleSpan.class);
-               output.setSpan(new StyleSpan(Typeface.BOLD), where, l, 0);
-               output.setSpan(new RelativeSizeSpan(1.25f), where, l, 0);
-               output.setSpan(new KeywordSpan(), where, l, 0);
+               int where = getLast(output, KeywordSpan.class);
+               Log.d("Found Closing tag at", "" + l);
+               output.setSpan(new KeywordSpan(), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+               output.setSpan(new StyleSpan(Typeface.BOLD), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+               output.setSpan(new RelativeSizeSpan(1.25f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                keyword = output.subSequence(where, l).toString();
            } else if (tag.equalsIgnoreCase("dtrn")){
                int where = getLast(output, DefinitionLink.class);
@@ -182,7 +182,7 @@ public class DictEntry implements Html.TagHandler {
                 definitions.add(def);
                 int s = full.indexOf(span, start);
                 if (s> 0)
-                    text.setSpan(new DefinitionLink(def),s, s+span.length(), 0);
+                    text.setSpan(new DefinitionLink(def),s, s+span.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
     }

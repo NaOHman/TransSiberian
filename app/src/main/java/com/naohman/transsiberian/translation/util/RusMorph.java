@@ -2,9 +2,7 @@ package com.naohman.transsiberian.translation.util;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -101,5 +99,9 @@ public class RusMorph {
      */
     public List<String> getNormalForms(String keyword){
         return morphology.getNormalForms(keyword);
+    }
+
+    public List<String> getMorphInfo(String keyword){
+        return morphology.getMorphInfo(keyword);
     }
 }
