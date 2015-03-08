@@ -1,5 +1,8 @@
 package com.naohman.transsiberian.translation.util;
 
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.Html;
@@ -12,9 +15,11 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
 import com.naohman.language.transsiberian.R;
+import com.naohman.transsiberian.setUp.App;
 
 import org.xml.sax.XMLReader;
 import java.util.ArrayList;
@@ -25,7 +30,6 @@ import java.util.List;
  * Represents a dictionary entry in the translation database
  */
 public class DictEntry implements Html.TagHandler {
-    //TODO make spans visually distinct
     private SpanListener listener;
     private List<String> definitions = new ArrayList<>();
     private String keyword;
@@ -83,7 +87,6 @@ public class DictEntry implements Html.TagHandler {
     public void handleTag(final boolean opening, final String tag,
                           Editable output, final XMLReader xmlReader){
         int l = output.length();
-        Log.d("Found tag", tag + " at  " + l);
         //When we come across opening flags set marker flags on the output
         if (opening){
            if (tag.equalsIgnoreCase("ex")){
@@ -100,18 +103,16 @@ public class DictEntry implements Html.TagHandler {
         } else {
            if (tag.equalsIgnoreCase("ex")){
                int where = getLast(output, RelativeSizeSpan.class);
-               output.setSpan(new ForegroundColorSpan(R.color.ex_color),
-                       where, l, 0);
+               output.setSpan(new ForegroundColorSpan(App.context().getResources().
+                               getColor(R.color.ex_color)),where, l, 0);
                output.setSpan(new RelativeSizeSpan(0.8f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
            } else if (tag.equalsIgnoreCase("kref")){
                int where = getLast(output, ReferenceSpan.class);
-               output.setSpan(new ReferenceSpan(output.subSequence(where, l)), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+               output.setSpan(new ReferenceSpan(output.subSequence(where, l)), where, l,
+                       Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
            } else if (tag.equalsIgnoreCase("k")){
                int where = getLast(output, KeywordSpan.class);
-               Log.d("Found Closing tag at", "" + l);
                output.setSpan(new KeywordSpan(), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-               output.setSpan(new StyleSpan(Typeface.BOLD), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-               output.setSpan(new RelativeSizeSpan(1.25f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                keyword = output.subSequence(where, l).toString();
            } else if (tag.equalsIgnoreCase("dtrn")){
                int where = getLast(output, DefinitionSpan.class);
@@ -238,7 +239,8 @@ public class DictEntry implements Html.TagHandler {
         @Override
         public void updateDrawState(TextPaint ds) {
             super.updateDrawState(ds);
-            ds.setColor(R.color.reference_color);
+            int color = App.context().getResources().getColor(R.color.reference_color);
+            ds.setColor(color);
         }
     }
 
@@ -257,7 +259,13 @@ public class DictEntry implements Html.TagHandler {
         @Override
         public void updateDrawState(TextPaint ds) {
             super.updateDrawState(ds);
-            ds.setColor(R.color.keyword_color);
+            Resources r = App.context().getResources();
+            ds.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            int fontSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+                    r.getDimension(R.dimen.subheading), r.getDisplayMetrics());
+            ds.setTextSize(fontSize);
+            ds.setColor(r.getColor(R.color.abc_primary_text_material_light));
+            ds.setUnderlineText(false);
         }
     }
 
@@ -279,7 +287,8 @@ public class DictEntry implements Html.TagHandler {
         @Override
         public void updateDrawState(TextPaint ds) {
             super.updateDrawState(ds);
-            ds.setColor(R.color.definition_color);
+            int color = App.context().getResources().getColor(R.color.definition_color);
+            ds.setColor(color);
         }
     }
 }
