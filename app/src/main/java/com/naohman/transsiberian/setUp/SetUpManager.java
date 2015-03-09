@@ -33,7 +33,7 @@ public class SetUpManager {
     }
 
     public void shutDown(){
-        //TODO cancel all threads
+        executor.shutdown();
     }
 
     /**

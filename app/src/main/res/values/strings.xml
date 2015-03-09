@@ -39,6 +39,7 @@
     <string name="create">Create</string>
     <string name="create_term">Create term in set</string>
     <string name="definition">Definition</string>
+    <string name="definitions_first">Definitions First</string>
     <string name="description">Description</string>
     <string name="delete_set">Delete Set</string>
     <string name="delete_set_prompt">Are you sure you want to delete the set</string>
@@ -49,17 +50,20 @@
     <string name="english_defs">English Definitions</string>
     <string name="english_terms">English Terms</string>
     <string name="exchange">Exchange</string>
+    <string name="fetch_error">Error fetching exchange rate</string>
     <string name="language">Language</string>
     <string name="incorrect">Incorrect</string>
     <string name="new_set">New Set</string>
     <string name="new_term">New Term</string>
     <string name="no">No</string>
     <string name="no_images">No Images Available</string>
+    <string name="no_internet">Couldn't connect to the internet</string>
     <string name="no_terms_warning">You can\'t study a set with no terms</string>
     <string name="no_thanks">No thanks</string>
+    <string name="old_currency">Couldn't connect to the internet. We have a saved exchange rate that is %s day%s old</string>
     <string name="quizlet">Quizlet</string>
-    <string name="remove">remove</string>
-    <string name="restart">restart</string>
+    <string name="remove">Remove</string>
+    <string name="restart">Restart</string>
     <string name="ruble">Rubles</string>
     <string name="russian_defs">Russian Definitions</string>
     <string name="russian_terms">Russian Terms</string>
@@ -72,8 +76,12 @@
     <string name="swap">Swap</string>
     <string name="switch_languages">Hey, I noticed you switched the term and definition languages. Do you want to switch all of the terms in this set with their definitions?</string>
     <string name="term">Term</string>
+    <string name="terms_first">Terms First</string>
     <string name="translate">Translate</string>
     <string name="translation_hint">Enter a word or short phrase</string>
+    <string name="try_again">Try again</string>
+    <string name="warning">Warning</string>
+    <string name="use_old">Use the old Rate</string>
     <string name="yes">Yes</string>
 
 </resources>

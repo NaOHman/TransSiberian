@@ -1,8 +1,6 @@
 package com.naohman.transsiberian.translation.util;
 
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.Html;
@@ -13,7 +11,6 @@ import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -135,7 +132,7 @@ public class DictEntry implements Html.TagHandler {
         List<String> spans = new ArrayList<>();
         String def = "", span = "", paren = "";
         boolean open = false, center = false;
-        //Parcing Char by Char is the only reliable way to go
+        //Parsing Char by Char is the only reliable way to go
         for(int p=0; p<target.length(); p++){
             char c = target.charAt(p);
             //if parenthesis are open
@@ -260,11 +257,8 @@ public class DictEntry implements Html.TagHandler {
         public void updateDrawState(TextPaint ds) {
             super.updateDrawState(ds);
             Resources r = App.context().getResources();
-            ds.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            int fontSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                    r.getDimension(R.dimen.subheading), r.getDisplayMetrics());
-            ds.setTextSize(fontSize);
-            ds.setColor(r.getColor(R.color.abc_primary_text_material_light));
+            ds.setTextSize(r.getDimensionPixelSize(R.dimen.heading));
+            ds.setColor(r.getColor(R.color.primary_text_default_material_light));
             ds.setUnderlineText(false);
         }
     }

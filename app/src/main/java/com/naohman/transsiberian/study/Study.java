@@ -288,23 +288,31 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
                 holder.removeAllViews();
                 holder.addView(mgr.getView(this));
                 return true;
-            case R.id.action_settings:
-                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     /**
      * switch the language symbol between Я and R
-     * todo handle sets with the same languag for terms and defs
      */
     public void setLangIcon(){
-        if (frontFirst ^ mySet.getLang_terms().equals(Quizlet.RUSSIAN)){
-            menu.getItem(0).setIcon(R.drawable.my_ya);
-            menu.getItem(0).setTitle("Russian First");
+        MenuItem langItem = menu.findItem(R.id.action_lang);
+        langItem.setChecked(frontFirst);
+        if (frontFirst) {
+            langItem.setTitle(getString(R.string.terms_first));
+            if (mySet.getLang_terms().equals(Quizlet.RUSSIAN)) {
+                langItem.setIcon(R.drawable.my_ya);
+            } else {
+                langItem.setIcon(R.drawable.my_r);
+            }
         } else {
-            menu.getItem(0).setIcon(R.drawable.my_r);
-            menu.getItem(0).setTitle("English First");
+            langItem.setTitle(getString(R.string.definitions_first));
+            if (mySet.getLang_definitions().equals(Quizlet.RUSSIAN)) {
+                langItem.setIcon(R.drawable.my_ya);
+            } else {
+                langItem.setIcon(R.drawable.my_r);
+            }
         }
     }
 }
