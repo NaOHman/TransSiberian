@@ -9,6 +9,7 @@ import com.naohman.transsiberian.translation.util.RusMorph;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +29,8 @@ public class SetUpManager {
         threadCount = Runtime.getRuntime().availableProcessors();
         workQueue = new LinkedBlockingQueue<>();
         executor = new ThreadPoolExecutor(threadCount, threadCount,
-                KEEP_ALIVE_TIME, KEEP_ALIVE_UNITS, workQueue);
+                KEEP_ALIVE_TIME, KEEP_ALIVE_UNITS,
+                workQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
     }
 
     public static SetUpManager getInstance(){
@@ -113,4 +115,23 @@ public class SetUpManager {
         });
     }
 
+    /**
+     * a private thread factory that creates threads that have a set android thread priority
+     */
+    private final static class ProcessPriorityThreadFactory implements ThreadFactory {
+
+        private final int threadPriority;
+
+        public ProcessPriorityThreadFactory(int threadPriority) {
+            this.threadPriority = threadPriority;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = new Thread(r);
+            thread.setPriority(threadPriority);
+            return thread;
+        }
+
+    }
 }
