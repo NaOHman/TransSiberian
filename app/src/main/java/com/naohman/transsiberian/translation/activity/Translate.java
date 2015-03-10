@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -38,7 +37,6 @@ import java.util.Stack;
 public class Translate extends ActionBarActivity implements
         View.OnClickListener, SpanListener, TextView.OnEditorActionListener {
     private EditText et_keyword;
-    private Button btn_translate;
     private ListView lv_translation;
     private ProgressBar pb_loading;
     private Stack<TranslationListAdapter> previous = new Stack<>();
@@ -50,7 +48,7 @@ public class Translate extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_translate);
-        SetUpManager sMgr = new SetUpManager();
+        SetUpManager sMgr = SetUpManager.getInstance();
         sMgr.loadDictionary();
         sMgr.loadRusMorphology();
         sMgr.loadEngMorphology();
@@ -59,9 +57,8 @@ public class Translate extends ActionBarActivity implements
         pb_loading.setVisibility(View.INVISIBLE);
         et_keyword = (EditText) findViewById(R.id.et_keyword);
         et_keyword.setOnEditorActionListener(this);
-        btn_translate = (Button) findViewById(R.id.btn_translate);
         lv_translation = (ListView) findViewById(R.id.lv_translation);
-        btn_translate.setOnClickListener(Translate.this);
+        findViewById(R.id.btn_translate).setOnClickListener(Translate.this);
     }
 
     /**
@@ -127,11 +124,11 @@ public class Translate extends ActionBarActivity implements
      */
     public void setTranslation(List<DictEntry> translations){
         if (translations == null || translations.size() == 0){
-            List<DictEntry> entries = new ArrayList();
+            List<DictEntry> entries = new ArrayList<>();
             entries.add(new DictEntry());
-            current = new TranslationListAdapter(this, R.layout.translation_tv, entries);
+            current = new TranslationListAdapter(this, entries);
         } else {
-            current = new TranslationListAdapter(this, R.layout.translation_tv, translations);
+            current = new TranslationListAdapter(this, translations);
         }
         lv_translation.setAdapter(current);
         lv_translation.setSelectionAfterHeaderView();
@@ -223,8 +220,8 @@ public class Translate extends ActionBarActivity implements
      * a custom list adapter for displaying translations
      */
     private class TranslationListAdapter extends ArrayAdapter<DictEntry> {
-        public TranslationListAdapter(Context context, int resource, List<DictEntry> entries) {
-            super(context, resource, entries);
+        public TranslationListAdapter(Context context, List<DictEntry> entries) {
+            super(context, R.layout.translation_tv, entries);
         }
 
         @Override

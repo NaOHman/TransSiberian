@@ -20,18 +20,17 @@ import com.naohman.language.transsiberian.R;
  * Also begins the process of initialization
  */
 public class Splash extends Activity implements ViewSwitcher.ViewFactory {
-    private ProgressBar pb_loading;
     private ImageSwitcher switcher;
-    final int[] images = {R.drawable.car2, R.drawable.car1, R.drawable.car4, R.drawable.car3};
-    int imageNumber = 0;
+    private final int[] images = {R.drawable.car2, R.drawable.car1, R.drawable.car4, R.drawable.car3};
+    private int imageNumber = 0;
     @Override
     public void onCreate(Bundle savedInstance){
         super.onCreate(savedInstance);
         setContentView(R.layout.splash);
-        SetUpManager setUpManager = new SetUpManager();
+        SetUpManager setUpManager = SetUpManager.getInstance();
         setUpManager.loadEngMorphology();
         setUpManager.loadRusMorphology();
-        pb_loading = (ProgressBar) findViewById(R.id.loading);
+        ProgressBar pb_loading = (ProgressBar) findViewById(R.id.loading);
         switcher= (ImageSwitcher) findViewById(R.id.train_switcher);
         switcher.setFactory(this);
         pb_loading.setIndeterminate(true);

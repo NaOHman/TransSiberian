@@ -25,7 +25,6 @@ import java.util.List;
 
 public class Study extends ActionBarActivity implements View.OnTouchListener {
     private static long fast = 300, slow = 800, out = 500;
-    private TextView set_title, set_description;
     private AnimatorSet flipOut, flipIn;
     private Menu menu;
     private float startingX, initialX, initialY, minSwipe;
@@ -47,9 +46,9 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
         incorrect = (ImageView) findViewById(R.id.incorrect_img);
         correct = (ImageView) findViewById(R.id.correct_img);
         holder = (RelativeLayout) findViewById(R.id.flashcard_holder);
-        set_title = (TextView) findViewById(R.id.set_title);
+        TextView set_title = (TextView) findViewById(R.id.set_title);
         set_title.setText(mySet.getTitle());
-        set_description = (TextView) findViewById(R.id.set_description);
+        TextView set_description = (TextView) findViewById(R.id.set_description);
         set_description.setText(mySet.getDescription());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         findViewById(R.id.title_box).setOnClickListener(new View.OnClickListener() {
@@ -184,8 +183,8 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
             cAnim.cancel();
         if (iAnim != null)
             iAnim.cancel();
-        incorrect.setAlpha(bound(0f, .5f + (change / (2 * minSwipe)), 1f));
-        correct.setAlpha(bound(0f, .5f - (change / (2 * minSwipe)), 1f));
+        incorrect.setAlpha(bound(.5f + (change / (2 * minSwipe))));
+        correct.setAlpha(bound(.5f - (change / (2 * minSwipe))));
     }
 
     /**
@@ -244,13 +243,11 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
     }
 
     /**
-     * @param low a lower bound
-     * @param x a number
-     * @param high an upper bound
-     * @return the number if it is between the two bounds, otherwise, the bound it exceeds
+     * @param x a number to be bounded
+     * @return the number if it is between 0 and 1, otherwise, the bound it exceeds
      */
-    private static float bound(float low, float x, float high){
-        return Math.min(high, Math.max(low, x));
+    private static float bound(float x){
+        return Math.min(1f, Math.max(0, x));
     }
 
     @Override

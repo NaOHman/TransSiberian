@@ -1,6 +1,5 @@
 package com.naohman.transsiberian.translation.util;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.naohman.transsiberian.setUp.App;

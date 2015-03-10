@@ -1,6 +1,5 @@
 package com.naohman.transsiberian.translation.util;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -112,8 +111,6 @@ public class DictionaryHandler {
         keyword = keyword.replaceAll("to\\s", "");
         keyword = keyword.replaceAll("[^A-Za-zА-Яа-я ]", "");
         List<String> baseforms = new ArrayList<>();
-        for (String info : RusMorph.getInstance().getMorphInfo(keyword))
-            Log.d("Morph Info", info);
         try {
             if (isRussian(keyword)) {
                 baseforms.addAll(RusMorph.getInstance().getNormalForms(keyword));
@@ -165,7 +162,7 @@ public class DictionaryHandler {
      * @param s a string of characters
      * @return whether that string could be a russian word or phrase
      */
-    public static boolean isRussian(String s) {
+    private static boolean isRussian(String s) {
         return s.matches("[ а-яА-Я]+");
     }
 
@@ -173,7 +170,7 @@ public class DictionaryHandler {
      * @param s a string of characters
      * @return whether that string could be an english word or phase
      */
-    public static boolean isEnglish(String s) {
+    private static boolean isEnglish(String s) {
         return s.matches("[ a-zA-Z]+");
     }
 }

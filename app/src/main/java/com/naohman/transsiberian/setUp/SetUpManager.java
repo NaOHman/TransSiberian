@@ -1,6 +1,5 @@
 package com.naohman.transsiberian.setUp;
 
-import android.content.Context;
 
 import com.naohman.transsiberian.quizlet.Quizlet;
 import com.naohman.transsiberian.translation.util.DictionaryHandler;
@@ -25,11 +24,20 @@ public class SetUpManager {
     private BlockingQueue<Runnable> workQueue;
     private static SetUpManager instance;
 
-    public SetUpManager(){
+    private SetUpManager(){
         threadCount = Runtime.getRuntime().availableProcessors();
         workQueue = new LinkedBlockingQueue<>();
         executor = new ThreadPoolExecutor(threadCount, threadCount,
                 KEEP_ALIVE_TIME, KEEP_ALIVE_UNITS, workQueue);
+    }
+
+    public static SetUpManager getInstance(){
+        if (instance == null)
+            synchronized (SetUpManager.class){
+                if (instance == null)
+                    instance = new SetUpManager();
+            }
+        return instance;
     }
 
     public void shutDown(){

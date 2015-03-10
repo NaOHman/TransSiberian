@@ -3,7 +3,6 @@ package com.naohman.transsiberian.translation.util;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.style.LeadingMarginSpan;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;

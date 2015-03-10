@@ -33,7 +33,6 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
     public static final String SET = "set";
     private QuizletSet mySet;
     private Quizlet quizlet;
-    private TextView title_tv, description_tv;
     private ListView term_view;
     private List<Term> terms;
     private FragmentManager fm = getSupportFragmentManager();
@@ -47,9 +46,9 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
         Intent intent = getIntent();
         mySet = (QuizletSet) intent.getSerializableExtra(SET);
         isNew = intent.getBooleanExtra(NEW, false);
-        title_tv = (TextView) findViewById(R.id.set_title);
+        TextView title_tv = (TextView) findViewById(R.id.set_title);
         title_tv.setText(mySet.getTitle());
-        description_tv = (TextView) findViewById(R.id.set_description);
+        TextView description_tv = (TextView) findViewById(R.id.set_description);
         description_tv.setText(mySet.getDescription());
         term_view = (ListView) findViewById(R.id.term_lv);
         quizlet = Quizlet.getInstance();
@@ -61,7 +60,7 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
         });
         quizlet.open();
         terms = quizlet.getSetTerms(mySet.get_id());
-        term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
+        term_view.setAdapter(new TermListAdapter(this, terms));
     }
 
     /**
@@ -73,7 +72,7 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
     public void addTerm(String term, String definition) {
         quizlet.createTerm(mySet.get_id(), term, definition);
         terms = quizlet.getSetTerms(mySet.get_id());
-        term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
+        term_view.setAdapter(new TermListAdapter(this, terms));
     }
 
     /**
@@ -88,7 +87,7 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
             quizlet.removeTerm(oldTerm);
         quizlet.createTerm(mySet.get_id(), term, definition);
         terms = quizlet.getSetTerms(mySet.get_id());
-        term_view.setAdapter(new TermListAdapter(this, R.layout.set_list_item, terms));
+        term_view.setAdapter(new TermListAdapter(this, terms));
     }
 
     /**
@@ -96,8 +95,8 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
      * while referencing the item they hold
      */
     private class TermListAdapter extends ArrayAdapter<Term> {
-        public TermListAdapter(Context context, int resource, List<Term> terms) {
-            super(context, resource, terms);
+        public TermListAdapter(Context context, List<Term> terms) {
+            super(context, R.layout.set_list_item, terms);
         }
 
         @Override
@@ -114,7 +113,7 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
                 public void onClick(View v){
                     quizlet.removeTerm(myTerm);
                     terms = quizlet.getSetTerms(mySet.get_id());
-                    term_view.setAdapter(new TermListAdapter(SetActivity.this, R.layout.set_list_item, terms));
+                    term_view.setAdapter(new TermListAdapter(SetActivity.this, terms));
                 }
             });
             text_section.setOnClickListener(new View.OnClickListener() {

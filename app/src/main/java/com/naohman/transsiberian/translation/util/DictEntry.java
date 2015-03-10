@@ -1,7 +1,6 @@
 package com.naohman.transsiberian.translation.util;
 
 import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
@@ -12,7 +11,6 @@ import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 
 import com.naohman.language.transsiberian.R;

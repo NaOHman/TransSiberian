@@ -2,7 +2,6 @@ package com.naohman.transsiberian.exchange;
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
-import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
@@ -41,6 +40,5 @@ public class QuadraticAnimation extends Animation {
     protected void applyTransformation(float interpolatedTime, Transformation t){
         measure.getPosTan(measure.getLength() * interpolatedTime, pos,null);
         t.getMatrix().setTranslate(pos[0], pos[1]);
-        Log.d("Setting Position", pos[0] + " " + pos[1]);
     }
 }

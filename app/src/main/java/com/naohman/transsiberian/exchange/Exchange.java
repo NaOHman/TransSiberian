@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -37,7 +36,6 @@ import java.net.URISyntaxException;
  * An activity that performs currency exchanges
  */
 public class Exchange extends ActionBarActivity implements TextView.OnEditorActionListener {
-    //TODO add other currency options
     private final static String CURRENCTY_URL = "http://www.freecurrencyconverterapi.com/api/v3/convert?q=";
     private final static String EURO = "EUR";
     private final static String RUBLE = "RUB";
@@ -52,12 +50,11 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
 
     private boolean swapped = false;
     private float animDistance, animHeight;
-    private float[] rates;
+    private float[] rates = new float[2];
     private QuadraticAnimation toRight, toLeft;
     private Menu menu;
     private int whichRate = 0;
     private EditText currency_et;
-    private ImageView swap;
     private SharedPreferences prefs;
     private String currentCurrency;
     private TextView foreign, currency_tv, ruble;
@@ -73,14 +70,12 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         foreign = (TextView) findViewById(R.id.input_label);
         ruble = (TextView) findViewById(R.id.output_label);
         currency_tv = (TextView) findViewById(R.id.currency_tv);
-        swap = (ImageView) findViewById(R.id.swap);
         tv_container = (LinearLayout) findViewById(R.id.tv_container);
         loading = (ProgressBar) findViewById(R.id.loading);
         prefs = this.getPreferences(Context.MODE_PRIVATE);
         currentCurrency = prefs.getString(LAST_CURRENCY, DOLLAR);
-        //todo update menu
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getExchange();
+        getExchange(false);
 
         //Set up Animations
         toRight = new QuadraticAnimation();
@@ -99,35 +94,43 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_exchange, menu);
-        this.menu = menu;
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.currency) {
-            //Todo switch currency
-            return true;
+    /**
+     * a function that converts between the input and output currencies
+     */
+    public void convert(View v){
+        String base = currency_et.getText().toString();
+        if (rates[whichRate] == 0.0 || base.matches("\\s*")){
+            currency_tv.setText("");
+        } else {
+            float baseRate  = Float.parseFloat(base);
+            if (swapped ^ whichRate == 1){
+                currency_tv.setText("" + (baseRate / rates[whichRate]));
+            } else {
+                currency_tv.setText("" + (baseRate * rates[whichRate]));
+            }
         }
-
-        return super.onOptionsItemSelected(item);
     }
-    public void getExchange(){
+
+    /**
+     * Get the exchange rate for the current currency
+     * @param force whether to force an updayed
+     */
+    public void getExchange(final boolean force){
+        currency_et.setText("");
+        currency_tv.setText("");
         long elapsed = System.currentTimeMillis() - prefs.getLong(currentCurrency,0);
         rates[0] = prefs.getFloat(currentCurrency+SEP+RUBLE, 0f);
         rates[1] = prefs.getFloat(RUBLE+SEP+currentCurrency, 0f);
+
         //If the rate is less three hours old, don't bother updating it
-        if (elapsed < 3*hour)
+        if (elapsed < 3*hour && !force)
             return;
+
+        //make sure we're connected before trying to pull data
         ConnectivityManager cManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cManager.getActiveNetworkInfo();
+
         if (networkInfo != null && networkInfo.isConnected()){
             new ExchangeFetcher().execute();
         } else {
@@ -136,13 +139,13 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
                 String days = "" + ((int) elapsed / day);
                 String plural = elapsed > day * 2 ? "s": "";
                 new AlertDialog.Builder(this)
-                        .setTitle(getString(R.string.warning))
+                        .setTitle(R.string.warning)
                         .setMessage(String.format(getString(R.string.old_currency), days, plural))
                         .setPositiveButton(R.string.use_old, null)
                         .setPositiveButton(R.string.try_again, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getExchange();
+                                getExchange(force);
                             }
                         })
                         .show();
@@ -154,7 +157,7 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
                         .setPositiveButton(R.string.try_again, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getExchange();
+                                getExchange(force);
                             }
                         })
                         .setNegativeButton(R.string.cancel, null)
@@ -163,8 +166,66 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_exchange, menu);
+        this.menu = menu;
+        updateCurrency(currentCurrency);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_usd:
+                updateCurrency(DOLLAR);
+                return true;
+            case R.id.action_eur:
+                updateCurrency(EURO);
+                return true;
+            case R.id.action_gbp:
+                updateCurrency(POUND);
+                return true;
+            case R.id.action_jpy:
+                updateCurrency(YEN);
+                return true;
+            case R.id.refresh:
+                getExchange(true);
+            case R.id.which_rate:
+                item.setChecked(!item.isChecked());
+                whichRate = item.isChecked() ? 0 : 1;
+                convert(null);
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Set the currency and change the menu to reflect the new currency
+     * @param newCurrency the new currency
+     */
+    private void updateCurrency(String newCurrency){
+        currentCurrency = newCurrency;
+        MenuItem currency = menu.findItem(R.id.currency);
+        if (currentCurrency.equalsIgnoreCase(DOLLAR)) {
+            currency.setIcon(R.drawable.usd);
+            foreign.setText(R.string.usd);
+        } else if (currentCurrency.equalsIgnoreCase(EURO)) {
+            currency.setIcon(R.drawable.eur);
+            foreign.setText(R.string.eur);
+        } else if (currentCurrency.equalsIgnoreCase(POUND)) {
+            currency.setIcon(R.drawable.gbp);
+            foreign.setText(R.string.gbp);
+        } else if (currentCurrency.equalsIgnoreCase(YEN)) {
+            currency.setIcon(R.drawable.jpy);
+            foreign.setText(R.string.jpy);
+        }
+        getExchange(false);
+    }
+
     /**
      * a function that switches the input currency and ouput currency
+     * now with animations!
      */
     public void swap(View v){
         toRight.setPath(-animDistance, -animHeight, swapped);
@@ -173,23 +234,6 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         ruble.startAnimation(toLeft);
         swapped = !swapped;
         convert(null);
-    }
-
-    /**
-     * a function that converts between the input and output currencies
-     */
-    public void convert(View v){
-        String base = currency_et.getText().toString();
-        if (rates[whichRate] == 0.0 || base.matches("\\s*")){
-            currency_tv.setText("");
-        } else {
-            float baseRate  = Float.parseFloat(base);
-            if (swapped){
-                currency_tv.setText("" + (baseRate / rates[whichRate]));
-            } else {
-                currency_tv.setText("" + (baseRate * rates[whichRate]));
-            }
-        }
     }
 
     @Override
@@ -237,7 +281,7 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
                         .setPositiveButton(R.string.try_again, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getExchange();
+                                getExchange(false);
                             }
                         }).setNegativeButton(R.string.cancel, null)
                         .show();
@@ -246,6 +290,7 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
                     tv_container.setVisibility(View.INVISIBLE);
             } else {
                 Exchange.this.rates = newRates;
+                //cache the data for future use
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putFloat(currentCurrency+SEP+RUBLE, rates[0]);
                 editor.putFloat(RUBLE+SEP+currentCurrency, rates[1]);
@@ -255,6 +300,13 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         }
     }
 
+    /**
+     * Pull and exchange rate from the internet
+     * @param client the client used to make the request
+     * @param query a query representing the desired exchange rate
+     * @return a float representing the exchange rate
+     * @throws Exception that may have occured so that the async task can handle it
+     */
     private static float fetchRate(HttpClient client, String query) throws Exception {
         try {
             URI address = new URI(CURRENCTY_URL + query);

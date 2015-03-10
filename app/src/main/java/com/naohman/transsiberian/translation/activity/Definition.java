@@ -70,12 +70,10 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
     private TextView no_images;
     private ProgressBar pb;
     private String keyword, definition;
-    private ListView lv_definitions;
     private QuizletSet mySet;
     private float initialX;
     private Quizlet quizlet;
     private static Animation lIn, lOut, rIn, rOut;
-    private TextView tv_keyword;
     private FragmentManager fm = getSupportFragmentManager();
 
     @Override
@@ -83,7 +81,7 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_definition);
-        SetUpManager sMgr = new SetUpManager();
+        SetUpManager sMgr = SetUpManager.getInstance();
         sMgr.loadTTS();
         pb = (ProgressBar) findViewById(R.id.switcher_loading);
         pb.setVisibility(View.VISIBLE);
@@ -106,13 +104,13 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
      */
     private void setMeanings(){
         Intent intent = getIntent();
-        tv_keyword = (TextView) findViewById(R.id.definition);
-        lv_definitions = (ListView) findViewById(R.id.definition_lv);
+        TextView tv_keyword = (TextView) findViewById(R.id.definition);
+        ListView lv_definitions = (ListView) findViewById(R.id.definition_lv);
         keyword = intent.getStringExtra("keyword");
         List<String> meanings = Arrays.asList(intent.getStringArrayExtra("meanings"));
         tv_keyword.setOnClickListener(this);
         tv_keyword.setText(keyword);
-        lv_definitions.setAdapter(new MeaningListAdapter(this, R.layout.translation_tv, meanings));
+        lv_definitions.setAdapter(new MeaningListAdapter(this, meanings));
         lv_definitions.setOnItemClickListener(this);
     }
 
@@ -340,8 +338,8 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
      * a private class for displaying meanings in a list view
      */
     private class MeaningListAdapter extends ArrayAdapter<String> {
-        public MeaningListAdapter(Context context, int resource, List<String> meanings) {
-            super(context, resource, meanings);
+        public MeaningListAdapter(Context context, List<String> meanings) {
+            super(context, R.layout.translation_tv, meanings);
         }
 
         @Override

@@ -133,7 +133,7 @@ public class SetListActivity extends ActionBarActivity implements SetFragment.Ne
      */
     private void reloadSetList(){
         List<QuizletSet> setList = quizlet.getAllSets();
-        SetAdapter adapter = new SetAdapter(this, R.layout.set_list_item, setList);
+        SetAdapter adapter = new SetAdapter(this, setList);
         sets.setAdapter(adapter);
     }
 
@@ -142,8 +142,8 @@ public class SetListActivity extends ActionBarActivity implements SetFragment.Ne
      * without the need for messy tags
      */
     private class SetAdapter extends ArrayAdapter<QuizletSet> {
-        public SetAdapter(Context context, int resource, List<QuizletSet> sets) {
-            super(context, resource, sets);
+        public SetAdapter(Context context, List<QuizletSet> sets) {
+            super(context, R.layout.set_list_item, sets);
         }
 
         @Override
@@ -213,7 +213,7 @@ public class SetListActivity extends ActionBarActivity implements SetFragment.Ne
                     public void onClick(DialogInterface dialog, int which) {
                         quizlet.deleteSet(mySet);
                         List<QuizletSet> setList = quizlet.getAllSets();
-                        SetAdapter adapter = new SetAdapter(SetListActivity.this, R.layout.set_list_item, setList);
+                        SetAdapter adapter = new SetAdapter(SetListActivity.this, setList);
                         sets.setAdapter(adapter);
                         dialog.dismiss();
                     }

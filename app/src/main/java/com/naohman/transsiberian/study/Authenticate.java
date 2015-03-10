@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Authenticate extends ActionBarActivity implements DialogInterface.OnClickListener {
-    private final String AUTH_URL = "https://api.quizlet.com/oauth/token";
-    private final String CODE_URL = "https://quizlet.com/authorize?response_type=code&client_id=%s&scope=read+write_set+write_group&state=Arkansas";
+    private final static String AUTH_URL = "https://api.quizlet.com/oauth/token";
+    private final static String CODE_URL = "https://quizlet.com/authorize?response_type=code&client_id=%s&scope=read+write_set+write_group&state=Arkansas";
     private ProgressBar pb_auth;
     private SharedPreferences prefs;
     @Override
@@ -84,7 +84,7 @@ public class Authenticate extends ActionBarActivity implements DialogInterface.O
         return super.onOptionsItemSelected(item);
     }
 
-    private void getAuthCode(View v){
+    public void getAuthCode(View v){
         ConnectivityManager cManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cManager.getActiveNetworkInfo();

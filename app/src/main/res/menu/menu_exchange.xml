@@ -4,8 +4,57 @@
     tools:context="com.naohman.transsiberian.exchange.Exchange">
     <item android:id="@+id/currency"
         android:title="@string/change_currency"
-        android:icon="@drawable/dollar"
-        app:showAsAction="ifRoom"
+        android:icon="@drawable/usd"
+        app:showAsAction="always"
         android:orderInCategory="1"
-        />
+        >
+        <menu >
+            <item android:id="@+id/action_usd"
+                android:title="@string/usd"
+                android:icon="@drawable/usd"
+                app:showAsAction="always|withText"
+                android:orderInCategory="0"
+                />
+            <item android:id="@+id/action_eur"
+                android:title="@string/eur"
+                android:icon="@drawable/eur"
+                app:showAsAction="always|withText"
+                android:orderInCategory="1"
+                />
+            <item android:id="@+id/action_gbp"
+                android:title="@string/gbp"
+                android:icon="@drawable/gbp"
+                app:showAsAction="always|withText"
+                android:orderInCategory="2"
+                />
+            <item android:id="@+id/action_jpy"
+                android:title="@string/jpy"
+                android:icon="@drawable/jpy"
+                app:showAsAction="always|withText"
+                android:orderInCategory="3"
+                />
+        </menu>
+    </item>
+    <item android:id="@+id/empty"
+        android:title="@string/action_settings"
+        android:icon="@drawable/ic_action_overflow"
+        android:orderInCategory="101"
+        app:showAsAction="always">
+        <menu>
+            <item android:id="@+id/refresh"
+                android:title="@string/refresh"
+                android:icon="@drawable/ic_action_refresh"
+                app:showAsAction="always|withText"
+                android:orderInCategory="1"
+                />
+            <item android:id="@+id/which_rate"
+                android:title="@string/to_rate"
+                android:icon="@drawable/rub"
+                android:checkable="true"
+                android:checked="true"
+                app:showAsAction="always|withText"
+                android:orderInCategory="0"
+                />
+        </menu>
+    </item>
 </menu>
