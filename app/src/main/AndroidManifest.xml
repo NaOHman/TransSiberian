@@ -36,6 +36,11 @@
             android:label="@string/title_activity_translate"
             android:launchMode="singleTop"
             android:parentActivityName="com.naohman.transsiberian.setUp.Landing" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/translation_searchable" />
             <!-- Parent activity meta-data to support API level 7+ -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -1,18 +1,20 @@
 package com.naohman.transsiberian.translation.activity;
 
+import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -35,14 +37,14 @@ import java.util.Stack;
  * An activity that allows users translate words between english and russian
  */
 public class Translate extends ActionBarActivity implements
-        View.OnClickListener, SpanListener, TextView.OnEditorActionListener {
+        SpanListener, SearchView.OnQueryTextListener {
     private EditText et_keyword;
     private ListView lv_translation;
     private ProgressBar pb_loading;
     private Stack<TranslationListAdapter> previous = new Stack<>();
     private TranslationListAdapter current = null;
+    private SearchView mSearchView;
 
-    //TODO handle up navigation somehow
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,20 +57,7 @@ public class Translate extends ActionBarActivity implements
         sMgr.loadTTS();
         pb_loading = (ProgressBar) findViewById(R.id.translations_loading);
         pb_loading.setVisibility(View.INVISIBLE);
-        et_keyword = (EditText) findViewById(R.id.et_keyword);
-        et_keyword.setOnEditorActionListener(this);
         lv_translation = (ListView) findViewById(R.id.lv_translation);
-        findViewById(R.id.btn_translate).setOnClickListener(Translate.this);
-    }
-
-    /**
-     * translate the word that the user gave
-     * @param v the view that called this
-     */
-    @Override
-    public void onClick(View v) {
-        String keyword = et_keyword.getText().toString();
-        makeTranslations(keyword);
     }
 
     /**
@@ -189,6 +178,25 @@ public class Translate extends ActionBarActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_translate, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        menu.findItem(R.id.translate).expandActionView();
+        mSearchView =  (SearchView) menu.findItem(R.id.translate).getActionView();
+        mSearchView.requestFocus();
+//        mSearchView.setIconifiedByDefault(false);
+        if (searchManager != null) {
+            List<SearchableInfo> searchables = searchManager.getSearchablesInGlobalSearch();
+
+            SearchableInfo info = searchManager.getSearchableInfo(getComponentName());
+            for (SearchableInfo inf : searchables) {
+                if (inf.getSuggestAuthority() != null
+                        && inf.getSuggestAuthority().startsWith("applications")) {
+                    info = inf;
+                }
+            }
+            mSearchView.setSearchableInfo(info);
+        }
+
+        mSearchView.setOnQueryTextListener(this);
         return true;
     }
 
@@ -201,18 +209,18 @@ public class Translate extends ActionBarActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Enter query when the user hits go
-     * @param v the view
-     * @param actionId the id of the action
-     * @param event the event of the action
-     * @return whether the event was handled
-     */
     @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_GO){
-            onClick(null);
-        }
+    public boolean onQueryTextSubmit(String s) {
+        InputMethodManager imm = (InputMethodManager)getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+        makeTranslations(s);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        //TODO provide suggestions
         return false;
     }
 

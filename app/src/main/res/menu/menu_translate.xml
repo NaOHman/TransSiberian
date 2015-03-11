@@ -1,3 +1,14 @@
-<menu
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".Translate">
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Translate">
+    <item
+        android:id="@+id/translate"
+        android:title="Translate"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_action_forward"
+        android:iconifiedByDefault="false"
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        />
 </menu>
