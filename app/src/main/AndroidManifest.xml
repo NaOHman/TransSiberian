@@ -10,12 +10,12 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:name="com.naohman.transsiberian.setUp.App"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/Kholodno" >
         <activity
             android:name="com.naohman.transsiberian.setUp.Splash"
             android:label="@string/app_name"
             android:noHistory="true"
-            android:theme="@style/Theme.AppCompat.NoActionBar" >
+            android:theme="@style/Kholodno.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,6 +43,7 @@
         </activity>
         <activity
             android:name="com.naohman.transsiberian.setUp.Landing"
+            android:theme="@style/Kholodno.NoActionBar"
             android:label="@string/title_activity_landing" >
         </activity>
         <activity

@@ -13,7 +13,6 @@
         android:background="@color/hi_bg_3"
         android:textSize="@dimen/heading"
         android:text="@string/translate"
-        android:onClick="translate"
         />
     <Button
         android:id="@+id/study"
@@ -24,7 +23,6 @@
         android:background="@color/hi_bg_1"
         android:textSize="@dimen/heading"
         android:text="@string/study"
-        android:onClick="study"
         />
     <Button
         android:id="@+id/exchange"
@@ -35,6 +33,5 @@
         android:textColor="@color/hi_fg_2"
         android:textSize="@dimen/heading"
         android:text="@string/exchange"
-        android:onClick="exchange"
         />
 </LinearLayout>

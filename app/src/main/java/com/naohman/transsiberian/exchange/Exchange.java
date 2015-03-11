@@ -208,16 +208,16 @@ public class Exchange extends ActionBarActivity implements TextView.OnEditorActi
         currentCurrency = newCurrency;
         MenuItem currency = menu.findItem(R.id.currency);
         if (currentCurrency.equalsIgnoreCase(DOLLAR)) {
-            currency.setIcon(R.drawable.usd);
+            currency.setIcon(R.drawable.usd_light);
             foreign.setText(R.string.usd);
         } else if (currentCurrency.equalsIgnoreCase(EURO)) {
-            currency.setIcon(R.drawable.eur);
+            currency.setIcon(R.drawable.eur_light);
             foreign.setText(R.string.eur);
         } else if (currentCurrency.equalsIgnoreCase(POUND)) {
-            currency.setIcon(R.drawable.gbp);
+            currency.setIcon(R.drawable.gbp_light);
             foreign.setText(R.string.gbp);
         } else if (currentCurrency.equalsIgnoreCase(YEN)) {
-            currency.setIcon(R.drawable.jpy);
+            currency.setIcon(R.drawable.jpy_light);
             foreign.setText(R.string.jpy);
         }
         getExchange(false);

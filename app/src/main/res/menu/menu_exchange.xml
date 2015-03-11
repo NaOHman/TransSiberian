@@ -4,7 +4,7 @@
     tools:context="com.naohman.transsiberian.exchange.Exchange">
     <item android:id="@+id/currency"
         android:title="@string/change_currency"
-        android:icon="@drawable/usd"
+        android:icon="@drawable/usd_light"
         app:showAsAction="always"
         android:orderInCategory="1"
         >
