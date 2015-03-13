@@ -37,7 +37,7 @@
     </item>
     <item android:id="@+id/empty"
         android:title="@string/action_settings"
-        android:icon="@drawable/ic_action_overflow"
+        android:icon="@drawable/ic_action_overflow_light"
         android:orderInCategory="101"
         app:showAsAction="always">
         <menu>

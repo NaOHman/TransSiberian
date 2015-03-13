@@ -8,6 +8,8 @@ import android.view.View;
 import com.naohman.transsiberian.exchange.Exchange;
 import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.study.Authenticate;
+import com.naohman.transsiberian.study.SetListActivity;
+import com.naohman.transsiberian.study.Study;
 import com.naohman.transsiberian.translation.activity.Translate;
 
 /**
@@ -36,7 +38,7 @@ public class Landing extends Activity implements View.OnClickListener {
                 intent = new Intent(Landing.this, Exchange.class);
                 break;
             case R.id.study:
-                intent = new Intent(Landing.this, Authenticate.class);
+                intent = new Intent(Landing.this, SetListActivity.class);
                 break;
         }
         if (intent != null)

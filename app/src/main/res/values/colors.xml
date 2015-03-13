@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="flashCard">#cccccc</color>
-    <color name="hi_bg_1">#1515a3</color>
+    <color name="hi_bg_1">#0a6789</color>
     <color name="hi_fg_1">@color/abc_primary_text_material_dark</color>
-    <color name="hi_bg_2">#bf0a1f</color>
+    <color name="hi_bg_2">#cf0638</color>
     <color name="hi_fg_2">@color/abc_primary_text_material_dark</color>
     <color name="hi_bg_3">@color/background_material_light</color>
     <color name="hi_fg_3">@color/abc_primary_text_material_light</color>
     <color name="ex_color">#a1a1a1</color>
     <color name="reference_color">@color/hi_bg_1</color>
     <color name="keyword_color">@color/abc_primary_text_material_light</color>
-    <color name="definition_color">#00BA70</color>
+    <color name="definition_color">#009A60</color>
 </resources>

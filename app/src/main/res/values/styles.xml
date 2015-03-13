@@ -5,17 +5,22 @@
         <!-- Customize your theme here. -->
         <item name="android:windowActionBar">true</item>
         <item name="actionBarStyle">@style/myActionBarStyle</item>
+        <item name="android:actionOverflowButtonStyle">@style/myOverflowButtonStyle</item>
+        <item name="actionOverflowButtonStyle">@style/myOverflowButtonStyle</item>
     </style>
 
-    <style name="Kholodno.NoActionBar" parent="android:Theme.Holo.Light">
+    <style name="Kholodno.NoActionBar" parent="android:Theme.Holo.Light.NoActionBar">
         <item name="android:windowActionBar">false</item>
     </style>
 
     <style name="myActionBarStyle"
         parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/hi_bg_1</item>
-        <item name="background">@color/hi_bg_1</item>
-        <item name="android:textColor">@color/hi_fg_1</item>
+        <item name="android:background">@color/hi_bg_2</item>
+        <item name="background">@color/hi_bg_2</item>
+        <item name="android:textColor">@color/hi_fg_2</item>
+    </style>
+    <style name="myOverflowButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_overflow_light</item>
     </style>
 
 </resources>

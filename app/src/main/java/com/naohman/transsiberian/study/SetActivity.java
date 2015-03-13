@@ -1,10 +1,13 @@
 package com.naohman.transsiberian.study;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.naohman.transsiberian.quizlet.QuizletSet;
+import com.naohman.transsiberian.quizlet.SetFragment;
 import com.naohman.transsiberian.quizlet.Term;
 import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.quizlet.Quizlet;
@@ -28,7 +32,7 @@ import java.util.List;
  * An activity that displays information about a set an allows
  * users to edit their terms
  */
-public class SetActivity extends ActionBarActivity implements TermFragment.NewTermListener {
+public class SetActivity extends ActionBarActivity implements TermFragment.NewTermListener, SetFragment.NewSetListener{
     public static final String NEW = "new";
     public static final String SET = "set";
     private QuizletSet mySet;
@@ -55,9 +59,14 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
         findViewById(R.id.title_box).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                study();
+                SetFragment setFragment = SetFragment.newInstance(mySet);
+                setFragment.show(fm, "Edit set");
             }
         });
+        loadSet();
+    }
+
+    private void loadSet(){
         quizlet.open();
         terms = quizlet.getSetTerms(mySet.get_id());
         term_view.setAdapter(new TermListAdapter(this, terms));
@@ -88,6 +97,45 @@ public class SetActivity extends ActionBarActivity implements TermFragment.NewTe
         quizlet.createTerm(mySet.get_id(), term, definition);
         terms = quizlet.getSetTerms(mySet.get_id());
         term_view.setAdapter(new TermListAdapter(this, terms));
+    }
+
+    @Override
+    public void addSet(String title, String description, String termLang, String defLang) {
+        Log.e("Attempted to create set in edit activity", "Bailing");
+        startActivity(new Intent(this, SetListActivity.class));
+    }
+
+    @Override
+    public void editSet(QuizletSet oldSet, String title, String description, String termLang, String defLang) {
+        quizlet.deleteSet(mySet);
+        mySet = quizlet.createSet(title, description, termLang, defLang);
+
+        //if the user switched the term and definition languages, offer to switch the
+        //terms and the definitions in the set
+        if (!termLang.equals(oldSet.getLang_terms()) && !defLang.equals(oldSet.getLang_definitions())){
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.switch_languages)
+                    .setCancelable(false)
+                    .setNegativeButton(R.string.no_thanks, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            for (Term term : terms)
+                                quizlet.createTerm(mySet.get_id(), term.getDefinition(), term.getTerm());
+                        }
+                    })
+                    .setPositiveButton(R.string.sure, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            for (Term term : terms)
+                                quizlet.createTerm(mySet.get_id(), term.getTerm(), term.getDefinition());
+                        }
+                    }).show();
+        } else {
+            for (Term term : terms)
+                quizlet.createTerm(mySet.get_id(), term.getTerm(), term.getDefinition());
+        }
+        loadSet();
     }
 
     /**

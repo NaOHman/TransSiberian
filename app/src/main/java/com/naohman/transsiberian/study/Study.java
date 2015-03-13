@@ -75,6 +75,9 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
         if (terms.isEmpty())
             bail();
         mgr = new FlashCardManager(quizlet.getSetTerms(mySet.get_id()), frontFirst, holder);
+        incorrect.setAlpha(0f);
+        correct.setAlpha(0f);
+        holder.removeAllViews();
         holder.addView(mgr.getView(this));
     }
 
@@ -92,7 +95,8 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
      */
     public void flip(View v) {
         View next = mgr.flipView(this);
-        fade(fast, fast, 0f);
+        fade(incorrect, fast, 0f);
+        fade(correct, fast, 0f);
         flipOut.setTarget(v);
         holder.addView(next);
         flipIn.setTarget(next);
@@ -116,7 +120,6 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
                 minSwipe = v.getWidth() / 3;
                 initialX = event.getRawX();
                 initialY = event.getRawY();
-                fade(fast, fast, 0.5f);
                 flip = true;
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -143,7 +146,8 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
                     return true;
                 }
                 v.setX(startingX);
-                fade(fast, fast, 0f);
+                fade(incorrect, fast, 0f);
+                fade(correct, fast, 0f);
                 if (flip)
                     flip(v);
                 return true;
@@ -153,25 +157,21 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
 
     /**
      * Cancel any pending animations on the hint images and start a new one
-     * @param cDur the duration of the animation on the 'correct' image
-     * @param iDur the duraton of the animation on the 'incorrect' image
+     * @param target the view to be faded
+     * @param dur the duraton of the animation on the image
      * @param targetAlpha the alpha to be faded too
      */
-    private void fade(long cDur, long iDur, float targetAlpha){
-        if (cAnim != null)
-            cAnim.cancel();
-        correct.setVisibility(View.VISIBLE);
-        cAnim = correct.animate().
-                alpha(targetAlpha).
-                setDuration((long) (cDur * Math.abs(correct.getAlpha() - targetAlpha))).
-                setStartDelay(targetAlpha == 0.5f ? 100 : 0);
-        if (iAnim != null)
-            iAnim.cancel();
-        incorrect.setVisibility(View.VISIBLE);
-        iAnim = incorrect.animate().
-                alpha(targetAlpha).
-                setDuration((long) (iDur * Math.abs(incorrect.getAlpha() - targetAlpha))).
-                setStartDelay(targetAlpha == 0.5f ? 100 : 0);
+    private void fade(View target, long dur, float targetAlpha){
+        if (target.getAlpha() == targetAlpha)
+            return;
+        if (target.getAnimation() != null) {
+            target.getAnimation().cancel();
+            target.clearAnimation();
+        }
+        target.setVisibility(View.VISIBLE);
+        target.animate().
+               alpha(targetAlpha).
+               setDuration((long) (dur * Math.abs(target.getAlpha() - targetAlpha)));
     }
 
     /**
@@ -179,12 +179,19 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
      * @param change an x coordinate
      */
     public void adjustAlpha(float change){
-        if (cAnim != null)
-            cAnim.cancel();
-        if (iAnim != null)
-            iAnim.cancel();
-        incorrect.setAlpha(bound(.5f + (change / (2 * minSwipe))));
-        correct.setAlpha(bound(.5f - (change / (2 * minSwipe))));
+        float perc = change/minSwipe;
+        if (incorrect.getAnimation() != null){
+            incorrect.getAnimation().cancel();
+            incorrect.clearAnimation();
+        }
+        incorrect.setVisibility(View.VISIBLE);
+        incorrect.setAlpha(bound(perc));
+        if (correct.getAnimation() != null){
+            correct.getAnimation().cancel();
+            correct.clearAnimation();
+        }
+        correct.setVisibility(View.VISIBLE);
+        correct.setAlpha(bound(perc < 0 ? Math.abs(perc) : 0));
     }
 
     /**
@@ -198,12 +205,12 @@ public class Study extends ActionBarActivity implements View.OnTouchListener {
         if (dx < 0) {
             rOut.setDuration(dur);
             view.startAnimation(rOut);
-            fade(slow, fast, 0f);
+            fade(correct, slow, 0f);
             mgr.next();
         } else {
             lOut.setDuration(dur);
             view.startAnimation(lOut);
-            fade(fast, slow, 0f);
+            fade(incorrect, slow, 0f);
             mgr.save();
         }
     }

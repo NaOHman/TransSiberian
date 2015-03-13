@@ -38,7 +38,6 @@ import java.util.Stack;
  */
 public class Translate extends ActionBarActivity implements
         SpanListener, SearchView.OnQueryTextListener {
-    private EditText et_keyword;
     private ListView lv_translation;
     private ProgressBar pb_loading;
     private Stack<TranslationListAdapter> previous = new Stack<>();
@@ -179,10 +178,11 @@ public class Translate extends ActionBarActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_translate, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        menu.findItem(R.id.translate).expandActionView();
+//        menu.findItem(R.id.translate).expandActionView();
         mSearchView =  (SearchView) menu.findItem(R.id.translate).getActionView();
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setQueryHint(getString(R.string.translation_hint));
         mSearchView.requestFocus();
-//        mSearchView.setIconifiedByDefault(false);
         if (searchManager != null) {
             List<SearchableInfo> searchables = searchManager.getSearchablesInGlobalSearch();
 
