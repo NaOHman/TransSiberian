@@ -14,27 +14,22 @@ public class RusMorphDB extends SQLiteAssetHelper {
 
     private static final String DB_NAME = "rusmorph.db";
     public static final String TABLE_STATEMENTS = "statements";
-    public static final String TABLE_SPECIFIERS = "specifiers";
-    public static final String TABLE_TRANSFORMERS = "transformers";
-    public static final String TABLE_ATTRIBUTES = "attributes";
+    public static final String TABLE_FLEXIA = "flexia";
 
     public static final String COL_ROOT = "root";
-    public static final String COL_TRANS_ID = "trans_id";
-    public static final String COL_SPEC_ID = "spec_id";
-    public static final String COL_ATTR_IDS = "attr_ids";
-    public static final String COL_ATTR_ID = "attr_id";
-    public static final String COL_NAME = "name";
-    public static final String COL_TYPE = "type";
-    public static final String COL_FLEXIA = "flexia";
-    public static final String COL_ABBR = "abbr";
+    public static final String COL_FLEXIA_ID = "flexiaId";
+    public static final String COL_FLEXIA_LIST = "flexiaList";
+    public static final String COL_SPEC_LIST = "specifierList";
 
-    public static final String[] STATEMENT_COLS = {COL_ROOT, COL_TRANS_ID};
-    public static final String[] SPECIFIER_COLS = {COL_SPEC_ID, COL_ATTR_IDS, COL_NAME};
-    public static final String[] TRANSFORMER_COLS = {COL_TRANS_ID, COL_TYPE, COL_SPEC_ID, COL_FLEXIA};
-    public static final String[] ATTRIBUTE_COLS = {COL_ATTR_ID, COL_ABBR, COL_NAME};
+    public static final String[] STATEMENT_COLS = {COL_ROOT, COL_FLEXIA_ID};
+    public static final String[] FLEXIA_COLS = {COL_FLEXIA_ID, COL_FLEXIA_LIST, COL_SPEC_LIST};
 
 
-    private static final int DB_VERSION = 0;
+    public static final String ROOT_SELECTOR = "SELECT "+COL_FLEXIA_LIST+ " FROM " +
+            TABLE_STATEMENTS + " JOIN " + TABLE_FLEXIA + " USING (" + COL_FLEXIA_ID +
+            ") WHERE " + COL_ROOT + " = ?";
+
+    private static final int DB_VERSION = 3;
 
     /**
      * Note this method may be very expensive if the database

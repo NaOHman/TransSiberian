@@ -13,10 +13,38 @@ import java.io.File;
  */
 public class DictionaryDBHelper extends SQLiteAssetHelper {
 
+    private static final int DB_VERSION = 3;
     private static final String DB_NAME = "translation.db";
+
     public static final String TABLE_RE = "re";
+        public static final String COL_KEYWORD = "keyword";
+        public static final String COL_DEFINITION = "definition";
+    public static final String [] TRANSLATION_COLS =
+            {COL_KEYWORD, COL_DEFINITION}
+
     public static final String TABLE_ER = "er";
-    private static final int DB_VERSION = 2;
+        //public static final String COL_KEYWORD = "keyword";
+        //public static final String COL_DEFINITION = "definition";
+    //public static final String [] TRANSLATION_COLS =
+            //{COL_KEYWORD, COL_DEFINITION}
+
+
+    public static final String TABLE_STATEMENTS = "statements";
+        public static final String COL_ROOT = "root";
+        public static final String COL_FLEXIA_ID = "flexiaId";
+    public static final String[] STATEMENT_COLS = 
+            {COL_ROOT, COL_FLEXIA_ID};
+
+    public static final String TABLE_FLEXIA = "flexia";
+        //public static final String COL_FLEXIA_ID = "flexiaId";
+        public static final String COL_FLEXIA_LIST = "flexiaList";
+        public static final String COL_SPEC_LIST = "specifierList";
+    public static final String[] FLEXIA_COLS = 
+        {COL_FLEXIA_ID, COL_FLEXIA_LIST, COL_SPEC_LIST};
+
+    public static final String ROOT_SELECTOR = "SELECT "+COL_FLEXIA_LIST+ " FROM " +
+            TABLE_STATEMENTS + " JOIN " + TABLE_FLEXIA + " USING (" + COL_FLEXIA_ID +
+            ") WHERE " + COL_ROOT + " = ?";
 
     /**
      * Note this method may be very expensive if the database

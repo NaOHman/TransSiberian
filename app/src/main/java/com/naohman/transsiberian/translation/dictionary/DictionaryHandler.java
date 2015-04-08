@@ -4,7 +4,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.naohman.transsiberian.translation.morphology.EngMorph;
+
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 
 /**
@@ -17,8 +21,6 @@ public class DictionaryHandler {
     private SQLiteDatabase database;
     private DictionaryDBHelper dbHelper;
     private static DictionaryHandler instance;
-    private static final String[] TRANSLATION_COLS = {"keyword", "definition"};
-
 
     private DictionaryHandler() {
         dbHelper = new DictionaryDBHelper();
@@ -53,9 +55,29 @@ public class DictionaryHandler {
     }
 
     /**
+     * Returns a list of Dictionary entries that correspond to a given morpheme
+     * @param morpheme expected to be a single word
+     * @return the list of dictEntries corresponding to that word
+     */
+    private List<DictEntry> translationsFromMorpheme(String morpheme){
+        List<String> roots = getDictionaryForms(morpheme);
+        //No roots were found, try splitting the phrase
+        if (roots == null || roots.size() == 0){
+            Log.d("No Morphs", morpheme);
+            return null;
+        }
+        //turn the query cursor into a list of DictEntries
+        List<DictEntry> entries = new ArrayList<>();
+        for (String root : roots) {
+            entries.addAll(cursorToDictEntries(queryKeyword(root)));
+        }
+        return entries;
+    }
+    /**
      * Queries the database to find translations for given words.
-     * If it can't find a word, it tries to put words into 'dictionary form'
-     * and tries again before giving up.
+     * If it can't find a word, it tries to put words into split the word
+     * into different words, and if that doesn't work, it tries to find the
+     * root word before it gives up.
      * Note that this is an expensive call and could possibly trigger other
      * expensive operations
      * @param keyword the keyword to search
@@ -64,40 +86,28 @@ public class DictionaryHandler {
     public List<DictEntry> getTranslations(String keyword) {
         keyword = keyword.toLowerCase();
         Cursor cursor = queryKeyword(keyword);
-        List<DictEntry> entries = new ArrayList<>();
-        List<String> rawEntries = new ArrayList<>();
+        if (cursor.getCount() > 0)
+            return cursorToDictEntries(cursor);
+
         //No entries found, damage control time
-        if (cursor.getCount() == 0) {
-            //Try to find the root word of the query
-            List<String> morphs = getDictionaryForms(keyword);
-            //No roots were found, try splitting the phrase
-            if (morphs == null || morphs.size() == 0){
-                Log.d("No Morphs", keyword);
-                String[] words = keyword.split("\\s");
-                //If there's only one word give up
-                if (words.length > 1){
-                    Log.d("Multiple words", ""+ words.length);
-                    //Query each word and add them to the list of return values
-                    for (String word : words){
-                        List<DictEntry> entryList = getTranslations(word);
-                        Log.d("Looking for", word);
-                        if (entryList != null && entryList.size() > 0)
-                            entries.addAll(entryList);
-                    }
-                    Log.d("Sending", entries.size() + " Entries");
-                    return entries;
-                } else {
-                    return null;
-                }
-            }
-            //turn the query cursor into a list of DictEntries
-            for (String morph : morphs) {
-                cursor = queryKeyword(morph);
-                rawEntries.addAll(getColumns(cursor, 1));
-            }
+        String[] words = keyword.split("\\s+");
+        //Look for a root word
+        if (words.length == 1)
+            return translationsFromMorpheme(keyword);
+
+        //split up the words and search individually
+        List<DictEntry> entries = new ArrayList<>();
+        for (String word : words) {
+            List<DictEntry> wordEntries = getTranslations(word);
+            if (wordEntries != null)
+                entries.addAll(wordEntries);
         }
-        //turn the query cursor into a list of DictEntries
-        rawEntries = getColumns(cursor, 1);
+        return entries;
+    }
+
+    private static List<DictEntry> cursorToDictEntries(Cursor cursor){
+        List<String> rawEntries = getColumns(cursor, 1);
+        List<DictEntry> entries = new ArrayList<>();
         for (String entry : rawEntries)
             entries.add(new DictEntry(entry));
         return entries;
@@ -124,20 +134,22 @@ public class DictionaryHandler {
     }
 
     /**
+     * TODO handle mixed latin/cyrillic queries
      * @param keyword a search query
      * @return a cursor representing a database search for that keyword
      */
     private Cursor queryKeyword(String keyword) {
+        keyword = keyword.replaceAll("ё", "е");
         String[] whereArgs = {keyword};
         Cursor cursor;
         if (isRussian(keyword)) {
             cursor = database.query(DictionaryDBHelper.TABLE_RE,
-                    TRANSLATION_COLS, "keyword=?", whereArgs,
-                    null, null, null);
+                    DictionaryDBHelper.TRANSLATION_COLS, "keyword=?", 
+                    whereArgs, null, null, null);
         } else {
             cursor = database.query(DictionaryDBHelper.TABLE_ER,
-                    TRANSLATION_COLS, "keyword=? COLLATE NOCASE", whereArgs,
-                    null, null, null);
+                    DictionaryDBHelper.TRANSLATION_COLS, "keyword=? COLLATE NOCASE", 
+                    whereArgs, null, null, null);
         }
         return cursor;
     }
@@ -172,5 +184,75 @@ public class DictionaryHandler {
      */
     private static boolean isEnglish(String s) {
         return s.matches("[ a-zA-Z]+");
+    }
+
+///////////////////RUSSIAN MORPHOLOGY STUFF////////////////////
+
+    /**
+     * @param keyword a declined word
+     * @return a list of the possible root words
+     */
+    private Set<String> getNormalForms(String keyword){
+        //Hyphenated may appear as word-otherword
+        //or as word-word, we must handle both instances
+        Set<String> normalForms = new HashSet<>();
+        normalForms.addAll(pullNormalForms(keyword));
+
+        if (keyword.contains("-")) {
+            Set<String> escapedForms = pullNormalForms(escapeDashes(keyword));
+            for (String escapedForm : escapedForms) {
+                normalForms.add(escapedForm.replaceAll("()",""));
+            }
+        }
+        return normalForms;
+    }
+
+    private Set<String> pullNormalForms(String keyword) {
+        Set<String> normalForms = new HashSet<>();
+        for (int i=0; i<=keyword.length(); i++){
+            normalForms.addAll(queryStemPair(keyword.substring(0,i), keyword.substring(i)));
+        }
+        return normalForms;
+    }
+
+    private Set<String> queryStemPair(String root, String flexia){
+        Set<String> normalForms = new HashSet<>();
+        Cursor c = database.rawQuery(RusMorphDB.ROOT_SELECTOR, new String[] {root});
+        if (c.getCount() == 0)
+            return normalForms;
+        c.moveToFirst();
+        while(!c.isAfterLast()){
+            String flexiaList = c.getString(0);
+            String[] flexiaArray = flexiaList.split(",");
+            if (contains(flexiaArray, flexia))
+                normalForms.add(root + flexiaArray[0]);
+            c.moveToNext();
+        }
+        return normalForms;
+    }
+
+    private static boolean contains(String[] flexiaArray, String flexia){
+        for (String f : flexiaArray){
+            if (f.equals(flexia))
+                return true;
+        }
+        return false;
+    }
+
+//    public List<String> getMorphInfo(String keyword){
+//        return morphology.getMorphInfo(keyword);
+//    }
+
+    public List<String> getConjugations(String keyword){
+        return null;
+    }
+
+    private String escapeDashes(String keyword){
+        String[] chunks = keyword.split("-");
+        String escaped = chunks[0];
+        for (int i=1; i<chunks.length; i++){
+            escaped += "(" +chunks[i]+")";
+        }
+        return escaped;
     }
 }

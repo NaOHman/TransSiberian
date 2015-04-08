@@ -38,7 +38,7 @@ import com.naohman.transsiberian.quizlet.SetFragment;
 import com.naohman.transsiberian.quizlet.Term;
 import com.naohman.transsiberian.quizlet.TermFragment;
 import com.naohman.transsiberian.setUp.SetUpManager;
-import com.naohman.transsiberian.translation.util.MyTTS;
+import com.naohman.transsiberian.translation.dictionary.MyTTS;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -209,10 +209,6 @@ public class Definition extends ActionBarActivity implements View.OnClickListene
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 

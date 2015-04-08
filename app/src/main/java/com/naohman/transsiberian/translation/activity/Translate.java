@@ -16,16 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.setUp.SetUpManager;
-import com.naohman.transsiberian.translation.util.DictEntry;
-import com.naohman.transsiberian.translation.util.DictionaryHandler;
-import com.naohman.transsiberian.translation.util.SpanListener;
+import com.naohman.transsiberian.translation.dictionary.DictEntry;
+import com.naohman.transsiberian.translation.dictionary.DictionaryHandler;
+import com.naohman.transsiberian.translation.dictionary.SpanListener;
 
 
 import java.util.ArrayList;
@@ -86,9 +85,6 @@ public class Translate extends ActionBarActivity implements
                 DictionaryHandler dictionary = DictionaryHandler.getInstance();
                 dictionary.open();
                 entries = dictionary.getTranslations(params[0]);
-                for (DictEntry entry: entries){
-                    entry.setSpanListener(Translate.this);
-                }
                 return entries;
             }
 
@@ -116,6 +112,9 @@ public class Translate extends ActionBarActivity implements
             entries.add(new DictEntry());
             current = new TranslationListAdapter(this, entries);
         } else {
+            for (DictEntry entry : translations) {
+                entry.setSpanListener(Translate.this);
+            }
             current = new TranslationListAdapter(this, translations);
         }
         lv_translation.setAdapter(current);
@@ -202,10 +201,6 @@ public class Translate extends ActionBarActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 

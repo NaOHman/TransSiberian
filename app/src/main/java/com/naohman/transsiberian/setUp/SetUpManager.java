@@ -2,10 +2,10 @@ package com.naohman.transsiberian.setUp;
 
 
 import com.naohman.transsiberian.quizlet.Quizlet;
-import com.naohman.transsiberian.translation.util.DictionaryHandler;
-import com.naohman.transsiberian.translation.util.EngMorph;
-import com.naohman.transsiberian.translation.util.MyTTS;
-import com.naohman.transsiberian.translation.util.RusMorph;
+import com.naohman.transsiberian.translation.dictionary.DictionaryHandler;
+import com.naohman.transsiberian.translation.morphology.EngMorph;
+import com.naohman.transsiberian.translation.dictionary.MyTTS;
+import com.naohman.transsiberian.translation.morphology.RusMorph;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
