@@ -1,10 +1,11 @@
-package com.naohman.transsiberian.translation.util;
+package com.naohman.transsiberian.translation.morphology;
 
 import android.util.Log;
 
 import com.naohman.transsiberian.setUp.App;
 
-import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,18 +15,17 @@ import java.util.List;
 
 /**
  * Created by jeffrey on 1/21/15.
- * a singleton wrapper for Russian Lucene morphology to streamline loading
+ * a singleton wrapper of Enlish morphology to streamline loading
  */
-public class RusMorph {
-    private RussianLuceneMorphology morphology;
-    private static RusMorph instance;
+public class EngMorph {
+    private EnglishLuceneMorphology morphology;
+    private static EngMorph instance;
 
     /**
-     * Creating Morphology objects is very expensive, do not do it
-     * on the UI thread. Objects are saved in serialized form to
-     * improve loading time
+     * Note that construction a morphology is incredibly expensive.
+     * The object is serialized in a file to save on loading time
      */
-    private RusMorph(){
+    private EngMorph(){
         final File suspend_f = new File(App.context().getFilesDir(), "rusMorph");
         if (suspend_f.exists()) {
             FileInputStream fis = null;
@@ -33,7 +33,7 @@ public class RusMorph {
             try {
                 fis = new FileInputStream(suspend_f);
                 is = new ObjectInputStream(fis);
-                morphology = (RussianLuceneMorphology) is.readObject();
+                morphology = (EnglishLuceneMorphology) is.readObject();
             } catch (Exception e) {
                 Log.e("READ ERROR", e.getMessage());
             } finally {
@@ -46,8 +46,8 @@ public class RusMorph {
             }
         } else {
             try {
-                morphology = new RussianLuceneMorphology();
-                saveRusMorph();
+                morphology = new EnglishLuceneMorphology();
+                saveMorph();
             } catch (Exception e) {
                 Log.e("Problem creating Morphology", e.getMessage());
             }
@@ -55,23 +55,22 @@ public class RusMorph {
     }
 
     /**
-     * Note this is potentially very costly, do not run on the UI thread
-     * @return the Russian morphology
+     * Potentially very expensive, do not run on UI thread
      */
-    public static RusMorph getInstance(){
+    public static EngMorph getInstance(){
         if (instance == null)
-            synchronized (RusMorph.class){
+            synchronized (EngMorph.class){
                 if (instance == null)
-                    instance = new RusMorph();
+                    instance = new EngMorph();
             }
         return instance;
     }
 
     /**
-     * Serialize and save to file
+     * serialize the morphology and save it to a file
      */
-    private void saveRusMorph(){
-        final File savedFile = new File(App.context().getFilesDir(), "rusMorph");
+    private void saveMorph(){
+        final File savedFile = new File(App.context().getFilesDir(), "engMorph");
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         boolean keep = true;
@@ -93,14 +92,10 @@ public class RusMorph {
     }
 
     /**
-     * @param keyword a declined word
-     * @return a list of the possible root words
+     * @param keyword a conjugated word
+     * @return the possible root words
      */
     public List<String> getNormalForms(String keyword){
         return morphology.getNormalForms(keyword);
-    }
-
-    public List<String> getMorphInfo(String keyword){
-        return morphology.getMorphInfo(keyword);
     }
 }

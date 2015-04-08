@@ -1,4 +1,4 @@
-package com.naohman.transsiberian.translation.util;
+package com.naohman.transsiberian.translation.dictionary;
 
 import android.text.Html;
 import android.text.SpannableStringBuilder;

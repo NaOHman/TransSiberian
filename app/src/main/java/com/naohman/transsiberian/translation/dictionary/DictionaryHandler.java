@@ -1,4 +1,4 @@
-package com.naohman.transsiberian.translation.util;
+package com.naohman.transsiberian.translation.dictionary;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
