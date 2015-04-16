@@ -37,16 +37,19 @@ public class DictEntry implements Html.TagHandler {
         spannable = new SpannableStringBuilder();
         if (s != null) {
             Log.d("Creating Dict entry", s);
-            String[] lines = s.split("\n");
+            String[] lines = s.split("#");
+
             for (String line : lines) {
-                int indent = line.length();
-                line = line.replace("^ +", "");
-                indent -= line.length();
-                Spannable lineSpan = (Spannable)
-                        Html.fromHtml("<html><body>" + line + "</body></html>", null, this);
+                int indent;
+                Log.d("encountered ", "|" + line);
+                for (indent = 0; Character.isWhitespace(line.charAt(indent)); indent++);
+                line = line.substring(indent);
+                Log.d("Indenting ", indent + " points");
+                String fakeTML = "<html><body>" + line + "<br></body></html>";
+                Spannable lineSpan  = (Spannable) Html.fromHtml(fakeTML, null, this);
                 lineSpan.setSpan(new LeadingMarginSpan.Standard(30 * indent, 30 * indent),
                         0, lineSpan.length(), 0);
-                spannable.append(s);
+                spannable.append(lineSpan);
             }
         }
     }

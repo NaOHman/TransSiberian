@@ -13,7 +13,7 @@ import java.io.File;
  */
 public class DBHelper extends SQLiteAssetHelper {
 
-    private static final int DB_VERSION = 7;
+    private static final int DB_VERSION = 8;
     private static final String DB_NAME = "translation.db";
 
     public static final String TABLE_ER = "er";
