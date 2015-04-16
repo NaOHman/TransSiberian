@@ -3,9 +3,7 @@ package com.naohman.transsiberian.setUp;
 
 import com.naohman.transsiberian.quizlet.Quizlet;
 import com.naohman.transsiberian.translation.dictionary.DictionaryHandler;
-import com.naohman.transsiberian.translation.morphology.EngMorph;
 import com.naohman.transsiberian.translation.dictionary.MyTTS;
-import com.naohman.transsiberian.translation.morphology.RusMorph;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -52,31 +50,6 @@ public class SetUpManager {
      */
     public void post(Runnable r){
         executor.execute(r);
-    }
-
-
-    /**
-     * Asynchronously create a Russian Lucene Morphology
-     */
-    public void loadRusMorphology(){
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                RusMorph.getInstance();
-            }
-        });
-    }
-
-    /**
-     * Asynchronously create an English Lucene Morphology
-     */
-    public void loadEngMorphology(){
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                EngMorph.getInstance();
-            }
-        });
     }
 
     /**

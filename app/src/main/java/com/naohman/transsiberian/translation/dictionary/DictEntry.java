@@ -4,11 +4,13 @@ import android.content.res.Resources;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +19,7 @@ import com.naohman.language.transsiberian.R;
 import com.naohman.transsiberian.setUp.App;
 
 import org.xml.sax.XMLReader;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,13 +31,24 @@ public class DictEntry implements Html.TagHandler {
     private SpanListener listener;
     private List<String> definitions = new ArrayList<>();
     private String keyword;
-    private Spanned spannable;
+    private SpannableStringBuilder spannable;
 
     public DictEntry(String s){
-        s = s.replaceAll("<rref>[^<]+</rref>", ""); //remove reference to external resources
-        s = s.replaceAll("\\\\n", "<br>");    //turn newline into html linebreak
-        DictHeading h = new DictHeading(s, 0);
-        spannable = h.toSpan(0, this);
+        spannable = new SpannableStringBuilder();
+        if (s != null) {
+            Log.d("Creating Dict entry", s);
+            String[] lines = s.split("\n");
+            for (String line : lines) {
+                int indent = line.length();
+                line = line.replace("^ +", "");
+                indent -= line.length();
+                Spannable lineSpan = (Spannable)
+                        Html.fromHtml("<html><body>" + line + "</body></html>", null, this);
+                lineSpan.setSpan(new LeadingMarginSpan.Standard(30 * indent, 30 * indent),
+                        0, lineSpan.length(), 0);
+                spannable.append(s);
+            }
+        }
     }
 
     public DictEntry(){ }
@@ -84,35 +98,35 @@ public class DictEntry implements Html.TagHandler {
         int l = output.length();
         //When we come across opening flags set marker flags on the output
         if (opening){
-           if (tag.equalsIgnoreCase("ex")){
-               output.setSpan(new RelativeSizeSpan(0.8f),
-                       output.length(), output.length(), Spannable.SPAN_MARK_MARK);
-           } else if (tag.equalsIgnoreCase("kref")){
-               output.setSpan(new ReferenceSpan(""),l,l, Spannable.SPAN_MARK_MARK);
-           } else if (tag.equalsIgnoreCase("k")){
-               output.setSpan(new KeywordSpan(),l,l,Spannable.SPAN_MARK_MARK);
-           } else if (tag.equalsIgnoreCase("dtrn")){
-               output.setSpan(new DefinitionSpan(""), l,l,Spannable.SPAN_MARK_MARK);
-           }
-        //When we find closing tags, create the appropriate span from the marker to the current position
+            if (tag.equalsIgnoreCase("ex")){
+                output.setSpan(new RelativeSizeSpan(0.8f),
+                        output.length(), output.length(), Spannable.SPAN_MARK_MARK);
+            } else if (tag.equalsIgnoreCase("kref")){
+                output.setSpan(new ReferenceSpan(""),l,l, Spannable.SPAN_MARK_MARK);
+            } else if (tag.equalsIgnoreCase("k")){
+                output.setSpan(new KeywordSpan(),l,l,Spannable.SPAN_MARK_MARK);
+            } else if (tag.equalsIgnoreCase("dtrn")){
+                output.setSpan(new DefinitionSpan(""), l,l,Spannable.SPAN_MARK_MARK);
+            }
+            //When we find closing tags, create the appropriate span from the marker to the current position
         } else {
-           if (tag.equalsIgnoreCase("ex")){
-               int where = getLast(output, RelativeSizeSpan.class);
-               output.setSpan(new ForegroundColorSpan(App.context().getResources().
-                               getColor(R.color.ex_color)),where, l, 0);
-               output.setSpan(new RelativeSizeSpan(0.8f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-           } else if (tag.equalsIgnoreCase("kref")){
-               int where = getLast(output, ReferenceSpan.class);
-               output.setSpan(new ReferenceSpan(output.subSequence(where, l)), where, l,
-                       Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-           } else if (tag.equalsIgnoreCase("k")){
-               int where = getLast(output, KeywordSpan.class);
-               output.setSpan(new KeywordSpan(), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-               keyword = output.subSequence(where, l).toString();
-           } else if (tag.equalsIgnoreCase("dtrn")){
-               int where = getLast(output, DefinitionSpan.class);
-               handleDefSpans(output, where, l);
-           }
+            if (tag.equalsIgnoreCase("ex")){
+                int where = getLast(output, RelativeSizeSpan.class);
+                output.setSpan(new ForegroundColorSpan(App.context().getResources().
+                        getColor(R.color.ex_color)),where, l, 0);
+                output.setSpan(new RelativeSizeSpan(0.8f), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else if (tag.equalsIgnoreCase("kref")){
+                int where = getLast(output, ReferenceSpan.class);
+                output.setSpan(new ReferenceSpan(output.subSequence(where, l)), where, l,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else if (tag.equalsIgnoreCase("k")){
+                int where = getLast(output, KeywordSpan.class);
+                output.setSpan(new KeywordSpan(), where, l, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                keyword = output.subSequence(where, l).toString();
+            } else if (tag.equalsIgnoreCase("dtrn")){
+                int where = getLast(output, DefinitionSpan.class);
+                handleDefSpans(output, where, l);
+            }
         }
     }
 
@@ -145,27 +159,27 @@ public class DictEntry implements Html.TagHandler {
                         span += paren;
                     }
                 }
-            //Parenthesis aren't open
+                //Parenthesis aren't open
             } else {
-               if (c == '(') {
-                   open = true;
-                   //Parenthesis are in the middle of the section, they could contain
-                   //a particle such as (ся)
-                   if (!def.matches("\\s*")){
-                       center = true;
-                       paren = "(";
-                   }
-                //if we reach a 'breaking character' set the span
-               } else if (isBreak(c)) {
-                   defs.add(def);
-                   spans.add(span);
-                   open = false; center = false;
-                   def = ""; span = ""; paren = "";
-               //plain old chars
-               } else {
-                   def += c;
-                   span += c;
-               }
+                if (c == '(') {
+                    open = true;
+                    //Parenthesis are in the middle of the section, they could contain
+                    //a particle such as (ся)
+                    if (!def.matches("\\s*")){
+                        center = true;
+                        paren = "(";
+                    }
+                    //if we reach a 'breaking character' set the span
+                } else if (isBreak(c)) {
+                    defs.add(def);
+                    spans.add(span);
+                    open = false; center = false;
+                    def = ""; span = ""; paren = "";
+                    //plain old chars
+                } else {
+                    def += c;
+                    span += c;
+                }
             }
         }
         if (!def.matches("\\s*")){

@@ -1,15 +1,21 @@
 package com.naohman.transsiberian.translation.dictionary;
 
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.naohman.transsiberian.translation.morphology.EngMorph;
+import com.naohman.language.transsiberian.R;
+import com.naohman.transsiberian.setUp.App;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Created by jeffrey on 1/10/15.
@@ -18,12 +24,17 @@ import java.util.List;
  * open before using it and close when one is done with it
  */
 public class DictionaryHandler {
-    private SQLiteDatabase database;
-    private DictionaryDBHelper dbHelper;
     private static DictionaryHandler instance;
+    private SQLiteDatabase database;
+    private DBHelper dbHelper;
+    public static int RU = 1;
+    public static int EN = 2;
+    public static String ER_DIC = "er.dic";
+    public static String RE_DIC = "re.dic";
 
     private DictionaryHandler() {
-        dbHelper = new DictionaryDBHelper();
+//        rusMorph = parseMorphology();
+        dbHelper = new DBHelper();
     }
 
     /**
@@ -59,7 +70,7 @@ public class DictionaryHandler {
      * @param morpheme expected to be a single word
      * @return the list of dictEntries corresponding to that word
      */
-    private List<DictEntry> translationsFromMorpheme(String morpheme){
+    private List<DictEntry> translationsFromMorpheme(String morpheme, int language){
         List<String> roots = getDictionaryForms(morpheme);
         //No roots were found, try splitting the phrase
         if (roots == null || roots.size() == 0){
@@ -69,7 +80,7 @@ public class DictionaryHandler {
         //turn the query cursor into a list of DictEntries
         List<DictEntry> entries = new ArrayList<>();
         for (String root : roots) {
-            entries.addAll(cursorToDictEntries(queryKeyword(root)));
+            entries.addAll(cursorToDictEntries(queryKeyword(root, language),language));
         }
         return entries;
     }
@@ -85,15 +96,19 @@ public class DictionaryHandler {
      */
     public List<DictEntry> getTranslations(String keyword) {
         keyword = keyword.toLowerCase();
-        Cursor cursor = queryKeyword(keyword);
-        if (cursor.getCount() > 0)
-            return cursorToDictEntries(cursor);
+        int language = getLanguage(keyword);
+        Cursor cursor = queryKeyword(keyword, language);
+        Log.d("Looking for", keyword);
+        if (cursor.getCount() > 0) {
+            Log.d("Found entries", "" + cursor.getCount());
+            return cursorToDictEntries(cursor, language);
+        }
 
         //No entries found, damage control time
         String[] words = keyword.split("\\s+");
         //Look for a root word
         if (words.length == 1)
-            return translationsFromMorpheme(keyword);
+            return translationsFromMorpheme(keyword, language);
 
         //split up the words and search individually
         List<DictEntry> entries = new ArrayList<>();
@@ -105,11 +120,20 @@ public class DictionaryHandler {
         return entries;
     }
 
-    private static List<DictEntry> cursorToDictEntries(Cursor cursor){
-        List<String> rawEntries = getColumns(cursor, 1);
+    /**
+     * Return the dictionary entries a cursor points to
+     * @param c the cursor
+     * @return a list of dictionary entries
+     */
+    private static List<DictEntry> cursorToDictEntries(Cursor c, int language){
         List<DictEntry> entries = new ArrayList<>();
-        for (String entry : rawEntries)
-            entries.add(new DictEntry(entry));
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            long pos = c.getLong(1);
+            String definition = lookup(pos, language);
+            entries.add(new DictEntry(definition));
+            c.moveToNext();
+        }
         return entries;
     }
 
@@ -117,15 +141,15 @@ public class DictionaryHandler {
      * @param keyword the search query
      * @return the possible root words of the keyword
      */
-    private static List<String> getDictionaryForms(String keyword) {
+    private List<String> getDictionaryForms(String keyword) {
         keyword = keyword.replaceAll("to\\s", "");
         keyword = keyword.replaceAll("[^A-Za-zА-Яа-я ]", "");
         List<String> baseforms = new ArrayList<>();
         try {
             if (isRussian(keyword)) {
-                baseforms.addAll(RusMorph.getInstance().getNormalForms(keyword));
+                baseforms.addAll(getNormalForms(keyword));
             } else if (isEnglish(keyword)) {
-                baseforms.addAll(EngMorph.getInstance().getNormalForms(keyword));
+//                baseforms.addAll(EngMorph.getInstance().getNormalForms(keyword));
             }
             return baseforms;
         } catch (Exception e){
@@ -133,42 +157,35 @@ public class DictionaryHandler {
         }
     }
 
+    private static int getLanguage(String keyword){
+        if (isRussian(keyword))
+            return RU;
+        if (isEnglish(keyword))
+            return EN;
+        return 0;
+    }
+
     /**
      * TODO handle mixed latin/cyrillic queries
      * @param keyword a search query
      * @return a cursor representing a database search for that keyword
      */
-    private Cursor queryKeyword(String keyword) {
+    private Cursor queryKeyword(String keyword, int language) {
         keyword = keyword.replaceAll("ё", "е");
         String[] whereArgs = {keyword};
-        Cursor cursor;
-        if (isRussian(keyword)) {
-            cursor = database.query(DictionaryDBHelper.TABLE_RE,
-                    DictionaryDBHelper.TRANSLATION_COLS, "keyword=?", 
+        Cursor cursor = null;
+        if (language == RU){
+            cursor = database.query(DBHelper.TABLE_RE,
+                    DBHelper.TRANSLATION_COLS, "keyword=?",
                     whereArgs, null, null, null);
-        } else {
-            cursor = database.query(DictionaryDBHelper.TABLE_ER,
-                    DictionaryDBHelper.TRANSLATION_COLS, "keyword=? COLLATE NOCASE", 
+        } else if (language == EN) {
+            cursor = database.query(DBHelper.TABLE_ER,
+                    DBHelper.TRANSLATION_COLS, "keyword=? COLLATE NOCASE",
                     whereArgs, null, null, null);
         }
         return cursor;
     }
 
-    /**
-     * @param c a cursor into the database
-     * @param col the column we want to return
-     * @return all the entries in a column that a cursor points to
-     */
-    private static List<String> getColumns(Cursor c, int col) {
-        List<String> entries = new ArrayList<>();
-        c.moveToFirst();
-        while (!c.isAfterLast()) {
-            String response = c.getString(col);
-            entries.add(response);
-            c.moveToNext();
-        }
-        return entries;
-    }
 
     /**
      * @param s a string of characters
@@ -186,8 +203,6 @@ public class DictionaryHandler {
         return s.matches("[ a-zA-Z]+");
     }
 
-///////////////////RUSSIAN MORPHOLOGY STUFF////////////////////
-
     /**
      * @param keyword a declined word
      * @return a list of the possible root words
@@ -195,8 +210,7 @@ public class DictionaryHandler {
     private Set<String> getNormalForms(String keyword){
         //Hyphenated may appear as word-otherword
         //or as word-word, we must handle both instances
-        Set<String> normalForms = new HashSet<>();
-        normalForms.addAll(pullNormalForms(keyword));
+        Set<String> normalForms = pullNormalForms(keyword);
 
         if (keyword.contains("-")) {
             Set<String> escapedForms = pullNormalForms(escapeDashes(keyword));
@@ -208,24 +222,28 @@ public class DictionaryHandler {
     }
 
     private Set<String> pullNormalForms(String keyword) {
-        Set<String> normalForms = new HashSet<>();
-        for (int i=0; i<=keyword.length(); i++){
-            normalForms.addAll(queryStemPair(keyword.substring(0,i), keyword.substring(i)));
+        String [] whereArgs = new String[keyword.length() - 1];
+        StringBuilder sb = new StringBuilder().append(DBHelper.ROOT_SELECTOR);
+        for (int i=1; i<keyword.length(); i++){
+            whereArgs[i - 1] = keyword.substring(0,i);
+            sb.append(DBHelper.ROOT_OR_CLAUSE);
         }
-        return normalForms;
+        String sql = sb.toString();
+        Log.d("My query", sql);
+        Cursor c = database.rawQuery(sb.toString(), whereArgs);
+        return baseForms(keyword, c);
     }
 
-    private Set<String> queryStemPair(String root, String flexia){
+    private Set<String> baseForms(String keyword, Cursor c){
         Set<String> normalForms = new HashSet<>();
-        Cursor c = database.rawQuery(RusMorphDB.ROOT_SELECTOR, new String[] {root});
         if (c.getCount() == 0)
             return normalForms;
         c.moveToFirst();
-        while(!c.isAfterLast()){
-            String flexiaList = c.getString(0);
-            String[] flexiaArray = flexiaList.split(",");
-            if (contains(flexiaArray, flexia))
-                normalForms.add(root + flexiaArray[0]);
+        while (!c.isAfterLast()){
+            String stem = c.getString(0);
+            String[] flexia = c.getString(1).split(",");
+            if (contains(flexia, keyword.substring(stem.length())))
+                normalForms.add(stem + flexia[0]);
             c.moveToNext();
         }
         return normalForms;
@@ -239,13 +257,42 @@ public class DictionaryHandler {
         return false;
     }
 
+    private static String lookup(long position, int language){
+        if (language == EN) {
+            return readFile(R.raw.er, position);
+        } else if (language == RU){
+            return readFile(R.raw.re, position);
+        }
+        return null;
+    }
+
+    private static String readFile(int file, long position){
+        byte[] buffer = new byte[1024];
+        String def = "";
+        try{
+            GZIPInputStream gzis =
+                new GZIPInputStream(App.context().getResources().openRawResource(file));
+            while (position > 0) {
+                position -= gzis.skip(position);
+            }
+            int len = 0;
+            while ((def.split("<k>")).length < 3 && len >= 0){
+                len = gzis.read(buffer);
+                if (len > 0)
+                    def += new String(buffer, 0, len);
+            }
+            gzis.close();
+            return "<k>" + def.split("<k>")[1];
+        }catch(IOException ex){
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
 //    public List<String> getMorphInfo(String keyword){
 //        return morphology.getMorphInfo(keyword);
 //    }
 
-    public List<String> getConjugations(String keyword){
-        return null;
-    }
 
     private String escapeDashes(String keyword){
         String[] chunks = keyword.split("-");

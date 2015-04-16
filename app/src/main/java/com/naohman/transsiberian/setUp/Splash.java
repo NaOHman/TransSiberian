@@ -28,8 +28,7 @@ public class Splash extends Activity implements ViewSwitcher.ViewFactory {
         super.onCreate(savedInstance);
         setContentView(R.layout.splash);
         SetUpManager setUpManager = SetUpManager.getInstance();
-        setUpManager.loadEngMorphology();
-        setUpManager.loadRusMorphology();
+        setUpManager.loadDictionary();
         ProgressBar pb_loading = (ProgressBar) findViewById(R.id.loading);
         switcher= (ImageSwitcher) findViewById(R.id.train_switcher);
         switcher.setFactory(this);

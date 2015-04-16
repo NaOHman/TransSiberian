@@ -50,8 +50,6 @@ public class Translate extends ActionBarActivity implements
         setContentView(R.layout.activity_translate);
         SetUpManager sMgr = SetUpManager.getInstance();
         sMgr.loadDictionary();
-        sMgr.loadRusMorphology();
-        sMgr.loadEngMorphology();
         sMgr.loadTTS();
         pb_loading = (ProgressBar) findViewById(R.id.translations_loading);
         pb_loading.setVisibility(View.INVISIBLE);
@@ -177,7 +175,7 @@ public class Translate extends ActionBarActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_translate, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//        menu.findItem(R.id.translate).expandActionView();
+        menu.findItem(R.id.translate).expandActionView();
         mSearchView =  (SearchView) menu.findItem(R.id.translate).getActionView();
         mSearchView.setIconifiedByDefault(false);
         mSearchView.setQueryHint(getString(R.string.translation_hint));

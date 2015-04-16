@@ -1,6 +1,14 @@
 package com.naohman.transsiberian.setUp;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
+import android.util.Log;
+
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Copied from zeetoobiker on SO, a singleton that holds an application context
@@ -23,5 +31,14 @@ public class App extends android.app.Application {
      */
     public static Context context() {
         return mApp.getApplicationContext();
+    }
+
+    public static AssetFileDescriptor openAsset(String file) throws IOException {
+        AssetManager aManager = mApp.getAssets();
+        return aManager.openFd(file);
+    }
+
+    public static int getColor(int id){
+        return context().getResources().getColor(id);
     }
 }
